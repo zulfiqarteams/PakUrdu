@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /PakUrdu/profile
+Disallow: /PakUrdu/settings
+Disallow: /PakUrdu/progress
+Disallow: /PakUrdu/results
+
+Sitemap: https://zulfiqarteams.github.io/PakUrdu/sitemap.xml

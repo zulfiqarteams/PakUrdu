@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ur" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function () {
+        try {
+          var raw = window.localStorage.getItem("urduTypingTutorial:settings");
+          var settings = raw ? JSON.parse(raw) : null;
+          var language = settings && (settings.language === "en" || settings.language === "ur" || settings.language === "roman") ? settings.language : "ur";
+          document.documentElement.lang = language === "ur" ? "ur" : "en";
+          document.documentElement.dir = language === "ur" ? "rtl" : "ltr";
+          // Apply the saved theme BEFORE first paint. Without this, the page
+          // always paints light first and only switches to dark once React
+          // has mounted and SettingsProvider has run - a visible flash on
+          // every load/refresh for anyone using dark mode.
+          if (settings && settings.darkTheme === true) {
+            document.documentElement.classList.add("dark");
+          }
+          if (settings && settings.largeInterface === true) {
+            document.documentElement.classList.add("settings-large-text");
+          }
+        } catch (_) {
+          document.documentElement.lang = "ur";
+          document.documentElement.dir = "rtl";
+        }
+      })();
+    </script>
+
+    <!-- Primary SEO -->
+    <title>PAKURDU — Urdu Typing Tutorial | Learn Urdu Typing Online Free</title>
+    <meta
+      name="description"
+      content="Free Urdu typing tutorial with phonetic lessons, a virtual keyboard, guided practice, typing tests, and progress tracking. Learn Urdu typing online at your own pace."
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://zulfiqarteams.github.io/PakUrdu/" />
+    <meta name="theme-color" content="#0b131a" />
+    <meta name="author" content="PAKURDU" />
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="PAKURDU" />
+    <meta property="og:title" content="PAKURDU — Urdu Typing Tutorial | Learn Urdu Typing Online Free" />
+    <meta
+      property="og:description"
+      content="Free Urdu typing tutorial with phonetic lessons, a virtual keyboard, guided practice, typing tests, and progress tracking."
+    />
+    <meta property="og:url" content="https://zulfiqarteams.github.io/PakUrdu/" />
+    <meta property="og:image" content="https://zulfiqarteams.github.io/PakUrdu/og-cover.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ur_PK" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="PAKURDU — Urdu Typing Tutorial | Learn Urdu Typing Online Free" />
+    <meta
+      name="twitter:description"
+      content="Free Urdu typing tutorial with phonetic lessons, a virtual keyboard, guided practice, typing tests, and progress tracking."
+    />
+    <meta name="twitter:image" content="https://zulfiqarteams.github.io/PakUrdu/og-cover.png" />
+
+    <!-- Favicons / PWA icons -->
+    <link rel="shortcut icon" href="/PakUrdu/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/PakUrdu/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/PakUrdu/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/PakUrdu/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/PakUrdu/apple-touch-icon.png" />
+    <link rel="manifest" href="/PakUrdu/manifest.json" />
+
+    <!-- Structured data: helps Google understand this is a free educational web app -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "EducationalApplication",
+        "name": "PAKURDU — Urdu Typing Tutorial",
+        "alternateName": ["Online Urdu Test", "Urdu Typing Test", "PAKURDU Urdu Typing"],
+        "url": "https://zulfiqarteams.github.io/PakUrdu/",
+        "description": "Free Urdu typing tutorial with phonetic lessons, a virtual keyboard, guided practice, online Urdu typing tests, and progress tracking.",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Any (web browser)",
+        "inLanguage": ["en", "ur"],
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+
+    <!-- Structured data: WebSite — a second, distinct schema type on the
+         same entity is normal and helps Google understand the site as
+         a whole, separately from the "app" framing above. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "PAKURDU",
+        "url": "https://zulfiqarteams.github.io/PakUrdu/"
+      }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Nastaliq+Urdu:wght@400;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!--
+      GitHub Pages has no server-side routing, so a direct link or a
+      refresh on any route other than "/" (e.g. /learn or /lesson/foo)
+      would normally 404. public/404.html catches that 404 and redirects
+      here with the real path encoded in the query string; this script
+      decodes it and restores the correct URL via history.replaceState
+      BEFORE React Router mounts, so the app boots on the right page.
+      Based on the well-known rafgraph/spa-github-pages technique.
+    -->
+    <script>
+      (function () {
+        var query = window.location.search;
+        if (query[1] === "/") {
+          var decoded = query
+            .slice(1)
+            .split("&")
+            .map(function (segment) {
+              return segment.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(null, "", window.location.pathname.slice(0, -1) + decoded + window.location.hash);
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/PakUrdu/assets/index-DUeJuPbl.js"></script>
+    <link rel="stylesheet" crossorigin href="/PakUrdu/assets/index-BmNaOzFQ.css">
+  </head>
+  <body class="bg-paper text-ink font-body antialiased">
+    <div id="root"></div>
+  </body>
+</html>

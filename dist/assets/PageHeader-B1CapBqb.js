@@ -1,0 +1,6 @@
+import{c as x,j as e,L as c}from"./index-DUeJuPbl.js";/**
+ * @license lucide-react v0.446.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const o=x("ChevronRight",[["path",{d:"m9 18 6-6-6-6",key:"mthhwq"}]]);function h({title:r,description:i,breadcrumb:a,action:n}){return e.jsxs("div",{className:"border-b border-border pb-8 pt-10 sm:pt-14",children:[a&&a.length>0&&e.jsx("nav",{"aria-label":"Breadcrumb",className:"mb-3",children:e.jsx("ol",{className:"flex flex-wrap items-center gap-1.5 text-sm text-ink-faint",children:a.map((s,t)=>{const l=t===a.length-1;return e.jsxs("li",{className:"flex items-center gap-1.5",children:[t>0&&e.jsx(o,{className:"directional-icon",size:14,"aria-hidden":"true"}),s.to&&!l?e.jsx(c,{to:s.to,className:"hover:text-ink hover:underline",children:s.label}):e.jsx("span",{"aria-current":l?"page":void 0,className:l?"text-ink-soft":void 0,children:s.label})]},`${s.label}-${t}`)})})}),e.jsxs("div",{className:"flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",children:[e.jsxs("div",{children:[e.jsx("h1",{className:"text-2xl font-bold sm:text-3xl",children:r}),i&&e.jsx("p",{className:"mt-2 max-w-2xl text-base leading-relaxed text-ink-soft",children:i})]}),n&&e.jsx("div",{className:"shrink-0",children:n})]})]})}export{o as C,h as P};

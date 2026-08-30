@@ -1,0 +1,6 @@
+import{c as o,a7 as i,j as e,P as r,B as c,d as l}from"./index-DUeJuPbl.js";/**
+ * @license lucide-react v0.446.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const d=o("Compass",[["path",{d:"m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z",key:"9ktpf1"}],["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}]]);function x({icon:a,pageName:t,routePath:n,description:s}){return i(t),e.jsxs(r,{className:"flex min-h-[60vh] flex-col items-center justify-center py-20 text-center",children:[e.jsx("span",{className:"mb-6 inline-flex h-14 w-14 items-center justify-center rounded-lg bg-brand-50 text-brand-600",children:e.jsx(a,{size:26,"aria-hidden":"true"})}),e.jsx(c,{tone:"gold",className:"mb-4",children:"Coming in a future part"}),e.jsx("h1",{className:"text-3xl font-bold",children:t}),e.jsx("p",{className:"numeric mt-2 text-sm text-ink-faint",children:n}),e.jsx("p",{className:"mt-4 max-w-md text-base leading-relaxed text-ink-soft",children:s})]})}function u(){return l({title:"Page Not Found",noIndex:!0}),e.jsx(x,{icon:d,pageName:"Page not found",routePath:"404",description:"The page you're looking for doesn't exist. Use the navigation above to get back on track."})}export{u as default};
