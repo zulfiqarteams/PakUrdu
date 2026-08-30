@@ -1,0 +1,983 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /*
+   * Design tokens (light theme).
+   *
+   * These are the single source of truth for color — tailwind.config.ts
+   * points its semantic color names (paper, surface, ink, brand, gold,
+   * border, success, warning, error, info) at these variables instead
+   * of hard-coded hex values.
+   *
+   * This is architecture for a future dark theme, not a theme switcher:
+   * a `.dark` class on <html> would override the block below, and every
+   * component would repaint automatically since none of them hard-code
+   * color values. No toggle exists yet.
+   */
+  :root {
+    --color-paper: #FAF7F1;
+    --color-surface: #FFFFFF;
+    --color-surface-elevated: #FFFFFF;
+
+    --color-ink: #17232E;
+    --color-ink-soft: #48566A;
+    --color-ink-faint: #8792A0;
+
+    --color-brand-50: #EAF4F2;
+    --color-brand-100: #CFE6E1;
+    --color-brand-300: #6DAA9F;
+    --color-brand-500: #0D6B5F;
+    --color-brand-600: #0A594F;
+    --color-brand-700: #08463F;
+
+    --color-gold-100: #F3E4C6;
+    --color-gold-300: #DDB674;
+    --color-gold-500: #C08A34;
+    --color-gold-600: #9C6F28;
+
+    --color-border: #E4DDCC;
+    --color-border-strong: #D2C9B4;
+
+    --color-success-50: #E9F5EC;
+    --color-success-500: #2F9153;
+    --color-success-600: #257A43;
+
+    --color-warning-50: #FBF1E1;
+    --color-warning-500: #C08A34;
+    --color-warning-600: #9C6F28;
+
+    --color-error-50: #FBEBE7;
+    --color-error-500: #B3402E;
+    --color-error-600: #92331F;
+
+    --color-info-50: #EAF1F8;
+    --color-info-500: #2E6CA4;
+    --color-info-600: #235684;
+
+    /* Used only by the HandFingerGuide's active-finger highlight. */
+    --keyboard-key-active: #0F766E;
+  }
+
+  /*
+   * Dark theme tokens. Wired to the Settings page's Theme toggle,
+   * which adds/removes `class="dark"` on <html> via SettingsProvider.
+   */
+  .dark {
+    --color-paper: #10161D;
+    --color-surface: #171F29;
+    --color-surface-elevated: #1E2733;
+
+    --color-ink: #F3F5F7;
+    --color-ink-soft: #B7C0CC;
+    --color-ink-faint: #7C8896;
+
+    --color-brand-50: #123430;
+    --color-brand-100: #164039;
+    --color-brand-300: #3E8E7F;
+    --color-brand-500: #3FA895;
+    --color-brand-600: #63BCAB;
+    --color-brand-700: #8ED0C3;
+
+    --color-gold-100: #3A2E19;
+    --color-gold-300: #B08B4C;
+    --color-gold-500: #DDB674;
+    --color-gold-600: #E8CB98;
+
+    --color-border: #2A3441;
+    --color-border-strong: #3B4756;
+
+    --color-success-50: #123423;
+    --color-success-500: #4CB479;
+    --color-success-600: #6FC694;
+
+    --color-warning-50: #362A14;
+    --color-warning-500: #DDB674;
+    --color-warning-600: #E8CB98;
+
+    --color-error-50: #3A1F1B;
+    --color-error-500: #E17B62;
+    --color-error-600: #E89985;
+
+    --color-info-50: #182A3A;
+    --color-info-500: #6FA8D8;
+    --color-info-600: #8FBEE3;
+
+    --keyboard-key-active: #5EEAD4;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+  /* User-controlled interface scale. Tailwind spacing and typography use
+     rem units, so this scales the existing UI without changing layout rules. */
+  html.settings-large-text {
+    font-size: 112.5%;
+  }
+
+  html {
+    /* Prevents any stray wide element (a table, a long untranslated
+       word, a fixed-width card) from creating an unwanted horizontal
+       scrollbar on small screens. */
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply bg-paper text-ink;
+    overflow-x: hidden;
+    width: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-ink;
+  }
+
+  /* Visible, consistent keyboard focus ring across all interactive elements */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background-color: var(--color-gold-300);
+    color: var(--color-ink);
+  }
+
+  /* Numeric/data values (WPM, timers, accuracy %) always read left-to-right,
+     even inside an RTL-flowing parent. */
+  .numeric {
+    font-family: theme("fontFamily.mono");
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
+  /* Urdu-script content: right-to-left with the Nastaliq display face. */
+  .urdu-text {
+    /* Central Urdu shaping contract: every typing/Urdu display uses the
+       same real Urdu face and OpenType shaping features. */
+    font-family: theme("fontFamily.urdu");
+    direction: rtl;
+    unicode-bidi: isolate;
+    line-height: 2;
+    letter-spacing: normal;
+    word-spacing: normal;
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures contextual;
+    font-feature-settings: "ccmp" 1, "calt" 1, "liga" 1, "rlig" 1, "kern" 1;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Character feedback must stay inline so Arabic/Urdu joining is shaped as
+     one continuous text run. Inline-block/isolated character boxes break
+     contextual forms in Nastaliq. */
+  .typing-character {
+    display: inline;
+    unicode-bidi: normal;
+    letter-spacing: normal;
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures contextual;
+    font-feature-settings: "ccmp" 1, "calt" 1, "liga" 1, "rlig" 1, "kern" 1;
+  }
+
+  /* Comfortable RTL block for longer runs of Urdu copy (labels, lesson
+     body text) — same face, slightly roomier tracking/line-height than
+     `.urdu-text` needs for a single large display word. */
+  .urdu-body {
+    /* Never add tracking to Arabic/Urdu glyphs: even tiny positive
+       letter-spacing visibly damages joining in Nastaliq. */
+    font-family: theme("fontFamily.urdu");
+    direction: rtl;
+    unicode-bidi: isolate;
+    line-height: 2.1;
+    letter-spacing: normal;
+    word-spacing: normal;
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures contextual;
+    font-feature-settings: "ccmp" 1, "calt" 1, "liga" 1, "rlig" 1, "kern" 1;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /*
+   * Typography scale. Centralizes the heading/body hierarchy so pages
+   * pick a role (`text-display`, `text-page-heading`, ...) instead of
+   * hand-tuning font-size/leading/tracking per page. Existing pages
+   * that already used the equivalent utility classes directly (e.g.
+   * `text-2xl font-bold sm:text-3xl`) are visually unchanged — these
+   * classes formalize the same scale, they don't introduce a new one.
+   */
+  .text-display {
+    @apply font-display text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl;
+  }
+  .text-page-heading {
+    @apply font-display text-2xl font-bold leading-tight sm:text-3xl;
+  }
+  .text-section-heading {
+    @apply font-display text-2xl font-bold leading-snug sm:text-3xl;
+  }
+  .text-card-heading {
+    @apply font-display text-base font-semibold leading-snug;
+  }
+  .text-body {
+    @apply font-body text-base leading-relaxed text-ink-soft;
+  }
+  .text-small {
+    @apply font-body text-sm leading-relaxed text-ink-soft;
+  }
+  .text-label {
+    @apply font-body text-xs font-semibold uppercase tracking-widest text-ink-faint;
+  }
+  .text-caption {
+    @apply font-body text-xs text-ink-faint;
+  }
+
+  /* HandFingerGuide — adapted from PakUrdu; only the finger/hand
+     highlight styling is used, since the colored key-type legend
+     (.keyboard-key-active etc.) belongs to PakUrdu's own keyboard,
+     not Part 12's. */
+  .hand-guide {
+    width: min(100%, 360px);
+    margin: 0 auto;
+    padding: 0.65rem 0.65rem 0.2rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: var(--color-surface);
+  }
+
+  .hand-guide-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+    color: var(--color-ink-soft);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .hand-guide-heading strong {
+    color: var(--keyboard-key-active);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .hand-guide svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .hand-palm,
+  .hand-finger {
+    fill: var(--color-brand-100);
+    stroke: var(--color-brand-500);
+    stroke-width: 1.8;
+    transition: fill 150ms ease, filter 150ms ease, stroke 150ms ease, transform 180ms ease-out;
+    transform-box: fill-box;
+    transform-origin: bottom center;
+  }
+
+  .hand-finger {
+    fill: var(--color-info-50);
+    stroke: var(--color-info-500);
+  }
+
+  /*
+   * The finger for the current target key doesn't just change color —
+   * it visually "reaches" upward/inward toward the key it needs to
+   * press, then relaxes back once a different finger becomes active.
+   * Kept to a small translation (not a full reposition to the exact
+   * key coordinates) so it stays educational rather than distracting;
+   * `transition-duration` above is zeroed under `prefers-reduced-motion`.
+   */
+  .hand-finger-active {
+    fill: var(--keyboard-key-active);
+    stroke: var(--keyboard-key-active);
+    filter: drop-shadow(0 0 5px var(--keyboard-key-active));
+    transform: translateY(-6px) scaleY(1.045);
+    animation: hand-finger-reach 900ms ease-in-out infinite;
+  }
+
+  /*
+   * Gentle repeating "reach" so the active finger keeps nudging toward
+   * the key instead of holding one static lifted pose the whole time —
+   * this is what was missing before (a single, instant, never-repeating
+   * transform reads as "did it move at all?" rather than a motion).
+   */
+  @keyframes hand-finger-reach {
+    0%, 100% { transform: translateY(-6px) scaleY(1.045); }
+    50% { transform: translateY(-11px) scaleY(1.07); }
+  }
+
+  /*
+   * The pointer under a target key on the on-screen keyboard
+   * (`VirtualKeyboard`'s `.keyboard-key-pointer`) — a small triangle
+   * that bounces up toward the key it's under, giving motion directly
+   * on the keyboard itself rather than only in the separate hand-guide
+   * panel.
+   */
+  .keyboard-key-pointer {
+    width: 0;
+    height: 0;
+    margin-top: 2px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 6px solid var(--keyboard-key-active);
+    animation: keyboard-key-pointer-bounce 750ms ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes keyboard-key-pointer-bounce {
+    0%, 100% { transform: translate(-50%, 0); opacity: 0.55; }
+    50% { transform: translate(-50%, -4px); opacity: 1; }
+  }
+
+  .hand-finger-label,
+  .hand-title {
+    fill: var(--color-ink-soft);
+    font-family: theme("fontFamily.body");
+    font-size: 9px;
+    font-weight: 700;
+    pointer-events: none;
+  }
+
+  .hand-finger-active .hand-finger-label {
+    fill: var(--color-ink);
+  }
+
+  .hand-title {
+    fill: var(--color-ink-faint);
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  /*
+   * Homepage hero typing widget (`HeroTypingWidget`). Fills exactly
+   * the viewport height below the sticky Navbar (`4rem` = Navbar's
+   * `h-16`) so the word display and the on-screen keyboard are always
+   * visible together without scrolling (Requirement 1).
+   *
+   * Two `height` declarations, oldest-first, is a deliberate
+   * progressive-enhancement fallback: `100vh` (static viewport
+   * height) is supported everywhere; a browser that also understands
+   * `100dvh` (dynamic viewport height — accounts for mobile browser
+   * chrome showing/hiding) overrides it with the more accurate value.
+   * A browser that doesn't recognize `dvh` simply ignores that line
+   * and keeps the `vh` fallback, rather than the whole rule failing.
+   */
+  .hero-typing-height {
+    min-height: 0;
+    height: auto;
+  }
+
+  /* A single, predictable viewport for live typing text. Keeping the
+     marquee itself as the overflow boundary prevents long Urdu runs or
+     transform calculations from ever becoming page-level overlays. */
+  .typing-marquee {
+    /* Keep layout containment for measurement isolation, but never use paint
+       containment here: Nastaliq glyph ink can extend beyond its line box.
+       Paint containment clips that ink during the scrolling transform. */
+    contain: layout;
+    isolation: isolate;
+  }
+
+  .typing-marquee > .urdu-text {
+    unicode-bidi: isolate;
+    max-width: none;
+  }
+
+  /* Large single-glyph lesson targets need a real line box. Nastaliq ink can
+     extend well above/below the nominal font box, so `leading-none` is unsafe
+     here and can make dotted/descending letters look clipped. */
+  .learn-target-glyph {
+    display: inline-block;
+    line-height: 1.8;
+    white-space: nowrap;
+    overflow: visible;
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures contextual;
+  }
+
+  /* Typing screens should never reserve a mysterious right-hand gutter.
+     These rules only apply to the typing content, not the global shell. */
+  .typing-workspace {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* Premium glassmorphic word marquee. Each copy is width-identical, so the
+   track can move exactly 50% and hand off to the duplicate with no jump or
+   empty gap. The groups own the seam padding; the track itself has no gap. */
+@keyframes pakurdu-word-marquee-infinite {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+.word-marquee {
+  --marquee-duration: 30s;
+  --marquee-gap: clamp(0.65rem, 1.5vw, 1rem);
+  --marquee-surface: color-mix(in srgb, var(--color-ink) 7%, transparent);
+  --marquee-border: color-mix(in srgb, var(--color-ink) 14%, transparent);
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--color-brand-500) 11%, transparent), transparent 28%),
+    radial-gradient(circle at 88% 50%, color-mix(in srgb, #22c55e 8%, transparent), transparent 25%),
+    color-mix(in srgb, var(--color-paper) 88%, transparent);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.08);
+}
+
+.dark .word-marquee {
+  --marquee-surface: rgba(255, 255, 255, 0.05);
+  --marquee-border: rgba(255, 255, 255, 0.10);
+  background:
+    radial-gradient(circle at 12% 50%, rgba(34, 197, 94, 0.10), transparent 30%),
+    radial-gradient(circle at 88% 50%, rgba(63, 168, 149, 0.10), transparent 28%),
+    rgba(11, 19, 26, 0.78);
+}
+
+.word-marquee::before,
+.word-marquee::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  width: clamp(2rem, 9vw, 7rem);
+  pointer-events: none;
+}
+
+.word-marquee::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--color-paper), transparent);
+}
+
+.word-marquee::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--color-paper), transparent);
+}
+
+.dark .word-marquee::before {
+  background: linear-gradient(90deg, #0b131a, transparent);
+}
+
+.dark .word-marquee::after {
+  background: linear-gradient(270deg, #0b131a, transparent);
+}
+
+.word-marquee__viewport {
+  position: relative;
+  overflow: hidden;
+  padding: 0.75rem 0;
+  perspective: 1000px;
+}
+
+.word-marquee__track {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  transform: translate3d(0, 0, 0);
+  animation: pakurdu-word-marquee-infinite var(--marquee-duration) linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.word-marquee__group {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--marquee-gap);
+  padding-inline-end: var(--marquee-gap);
+}
+
+.word-marquee__word {
+  position: relative;
+  display: inline-flex;
+  min-height: 3rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow-wrap: normal;
+  direction: rtl;
+  unicode-bidi: normal;
+  padding: 0.55rem 1.1rem 0.7rem;
+  border: 1px solid var(--marquee-border);
+  border-radius: 999px;
+  background: var(--marquee-surface);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px) saturate(125%);
+  -webkit-backdrop-filter: blur(12px) saturate(125%);
+  color: var(--color-ink);
+  font-family: theme("fontFamily.urdu");
+  font-size: clamp(1rem, 1.7vw, 1.25rem);
+  font-weight: 700;
+  line-height: 1.85;
+  letter-spacing: normal;
+  font-kerning: normal;
+  font-variant-ligatures: common-ligatures contextual;
+  text-rendering: optimizeLegibility;
+  transform: translate3d(0, 0, 0) scale(1);
+  transform-style: preserve-3d;
+  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 300ms ease, box-shadow 300ms ease, background-color 300ms ease;
+}
+
+.word-marquee__word::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.10), transparent 45%, rgba(34, 197, 94, 0.06));
+  opacity: 0.8;
+}
+
+.word-marquee__word-glow {
+  position: absolute;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.14);
+  filter: blur(20px);
+  opacity: 0;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+
+.word-marquee__word-text {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  transform: translateZ(12px);
+}
+
+.word-marquee__word:hover {
+  z-index: 2;
+  border-color: rgba(34, 197, 94, 0.40);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(34, 197, 94, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  transform: translate3d(0, -4px, 0) scale(1.05) rotateX(1deg);
+}
+
+.word-marquee__word:hover .word-marquee__word-glow {
+  opacity: 1;
+}
+
+.word-marquee:hover .word-marquee__track,
+.word-marquee:focus-within .word-marquee__track {
+  animation-play-state: paused;
+}
+
+.word-marquee--slow { --marquee-duration: 40s; }
+.word-marquee--normal { --marquee-duration: 30s; }
+.word-marquee--fast { --marquee-duration: 22s; }
+
+@media (max-width: 640px) {
+  .word-marquee__viewport { padding-block: 0.65rem; }
+  .word-marquee__word { min-height: 2.75rem; padding-inline: 0.9rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word-marquee__track { animation: none; }
+  .word-marquee__word { transition: none; }
+}
+
+/* Directional controls follow the current writing direction; utility/action
+   icons such as refresh, settings and close remain unchanged. */
+html[dir="rtl"] .directional-icon {
+  transform: scaleX(-1);
+}
+
+/* Unified typing workspace + premium keyboard states */
+.keyboard-premium-key,.keyboard-premium-modifier,.keyboard-premium-space{background:var(--vk-key, color-mix(in srgb, var(--color-paper) 92%, var(--color-surface) 8%));border-color:var(--vk-border, var(--color-border));box-shadow:0 1px 0 color-mix(in srgb, white 16%, transparent),0 2px 5px color-mix(in srgb, black 10%, transparent);color:var(--color-ink)}
+.keyboard-premium-key--expected,.keyboard-premium-modifier--expected{border-color:var(--color-brand-500);background:var(--color-brand-50);box-shadow:0 0 0 1px color-mix(in srgb,var(--color-brand-500) 12%,transparent)}
+.keyboard-premium-key--pressed,.keyboard-premium-modifier--pressed{background:var(--color-brand-500);border-color:var(--color-brand-500);color:white;transform:translateY(1px) scale(.985)}
+.keyboard-premium-urdu{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;direction:rtl;unicode-bidi:normal;font-family:theme("fontFamily.urdu");font-kerning:normal;letter-spacing:normal;word-spacing:normal;font-variant-ligatures:common-ligatures contextual;font-feature-settings:"ccmp" 1,"calt" 1,"liga" 1,"rlig" 1,"kern" 1;font-synthesis:none;text-rendering:optimizeLegibility}
+.keyboard-premium-face{transition:opacity 150ms ease,transform 150ms ease}.keyboard-premium-face--base{opacity:1;transform:translateY(0)}.keyboard-premium-face--shift{opacity:1;transform:translateY(0)}
+.keyboard-premium-key .keyboard-premium-face--shift{animation:keyboard-face-in 150ms ease}.keyboard-premium-space{background:var(--color-surface)}
+@keyframes keyboard-face-in{from{opacity:.15;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+
+@media(prefers-reduced-motion:reduce){.keyboard-premium-face{transition:none}.keyboard-premium-key .keyboard-premium-face--shift{animation:none}}
+
+
+/* PAKURDU brand motion: subtle, purposeful, and disabled by the global
+ * prefers-reduced-motion rule above. */
+@keyframes pakurdu-brand-breathe {
+  0%, 100% { transform: translateY(0) scale(0.98); opacity: 0.88; }
+  50% { transform: translateY(-6px) scale(1.03); opacity: 1; }
+}
+.brand-splash-breathe {
+  animation: pakurdu-brand-breathe 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 18px 32px rgba(34, 197, 94, 0.12));
+}
+
+@keyframes pakurdu-achievement-rise {
+  0% { opacity: 0; transform: translateY(28px) scale(0.84); }
+  55% { opacity: 1; transform: translateY(-6px) scale(1.04); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.achievement-logo-rise {
+  animation: pakurdu-achievement-rise 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  filter: drop-shadow(0 16px 28px rgba(34, 197, 94, 0.14));
+}
+
+.keyboard-premium-key--expected::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 22px;
+  height: 5px;
+  transform: translateX(-50%);
+  border-bottom: 2px solid var(--color-brand-500);
+  border-radius: 0 0 100% 100%;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* =========================================================
+ * PakUrdu cinematic MP4 background
+ * The background is isolated in its own stacking context so the
+ * negative z-index remains behind the app shell, not behind <body>.
+ * ========================================================= */
+.video-background-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: -50;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  pointer-events: none;
+  background: #0b131a;
+  isolation: isolate;
+}
+
+.main-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  opacity: 0;
+  transform: translate3d(0, 0, 0) scale(1.015);
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  filter: saturate(0.72) contrast(0.94) brightness(0.78);
+  transition: opacity 500ms ease, filter 700ms ease;
+}
+
+.main-bg-video--ready {
+  opacity: 0.85;
+}
+
+/*
+ * This shield used to sit at 85% opacity with a 12px blur on top of a
+ * video already capped at 72% opacity — net result, the cinematic
+ * background was barely perceptible under normal browsing (only
+ * `--focus` mode, used during active typing tests, is meant to dim it
+ * this heavily). Lightened so the video actually reads as a video;
+ * `--focus` keeps its stronger dim/blur since that one's intentional
+ * (reduces distraction while typing).
+ */
+.video-overlay-shield {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 19, 26, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition:
+    background-color 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    backdrop-filter 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.video-background-wrapper--focus .main-bg-video {
+  opacity: 0.42;
+  filter: saturate(0.48) contrast(0.92) brightness(0.62);
+}
+
+.video-background-wrapper--focus .video-overlay-shield {
+  background: rgba(11, 19, 26, 0.95);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+@media (max-width: 768px) {
+  .main-bg-video {
+    opacity: 0;
+    object-position: center center;
+    filter: saturate(0.60) contrast(0.94) brightness(0.70);
+  }
+
+  .main-bg-video--ready {
+    opacity: 0.68;
+  }
+
+  .video-overlay-shield {
+    background: rgba(11, 19, 26, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .video-background-wrapper--focus .main-bg-video {
+    opacity: 0.30;
+  }
+
+  .video-background-wrapper--focus .video-overlay-shield {
+    background: rgba(11, 19, 26, 0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-bg-video {
+    display: none;
+  }
+
+  .video-overlay-shield {
+    background: #0b131a;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    transition: none;
+  }
+}
+
+/* =========================================================
+   Issues 4–8: shared premium typing surface + motion system
+   ========================================================= */
+
+:root {
+  --motion-fast: 180ms;
+  --motion-ui: 240ms;
+  --motion-slow: 700ms;
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-ui: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Never add tracking to Urdu/Arabic glyphs. These rules are intentionally
+   stronger than generic typography utilities inside typing surfaces. */
+.urdu-text,
+.urdu-body,
+.typing-interface,
+.typing-interface *[lang="ur"] {
+  letter-spacing: normal !important;
+  word-spacing: normal;
+  font-kerning: normal;
+  font-variant-ligatures: common-ligatures contextual;
+  font-feature-settings: "ccmp" 1, "calt" 1, "liga" 1, "rlig" 1, "kern" 1;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+/* ONE shared typing-display primitive. Character comparison remains per
+   grapheme in the engine; DOM nodes are merged into contiguous visual runs
+   so Urdu shaping survives state changes. */
+.typing-text-shell {
+  width: 100%;
+  direction: rtl;
+  isolation: isolate;
+}
+
+.typing-text-flow {
+  min-height: 6.5rem;
+  display: block;
+  overflow: visible;
+  white-space: normal;
+  line-height: 2;
+  text-align: center;
+}
+
+.typing-run {
+  display: inline;
+  direction: rtl;
+  unicode-bidi: normal;
+  white-space: pre-wrap;
+  word-break: normal;
+  overflow-wrap: normal;
+  transition: color var(--motion-fast) var(--ease-ui), text-decoration-color var(--motion-fast) var(--ease-ui), opacity var(--motion-fast) var(--ease-ui);
+}
+
+.typing-run--pending {
+  color: var(--color-ink-soft);
+}
+
+.typing-run--correct {
+  color: var(--color-success-600);
+}
+
+.typing-run--incorrect {
+  color: var(--color-error-600);
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-thickness: 2px;
+  text-underline-offset: .14em;
+}
+
+.typing-run--current {
+  color: var(--color-ink);
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--color-brand-500);
+  text-underline-offset: .16em;
+}
+
+.typing-scroll-viewport {
+  contain: layout;
+  isolation: isolate;
+  scrollbar-width: none;
+}
+.typing-scroll-viewport::-webkit-scrollbar { display: none; }
+
+.typing-scroll-track {
+  position: relative;
+  transform: translate3d(var(--typing-shift-x, 0px), 0, 0);
+  will-change: transform;
+  /* This shift re-runs on every keystroke (see TypingText.tsx). It was
+     280ms, which meant every character typed had a visible ~1/3-second
+     lag before the text/cursor settled into place — the "slow cursor"
+     feeling during fast typing. 110ms keeps the motion smooth without
+     it ever falling behind the person's typing speed. */
+  transition: transform 110ms var(--ease-ui);
+  padding-inline: 0.5rem;
+}
+
+.typing-cursor {
+  position: absolute;
+  left: 62%;
+  top: 0;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--color-brand-500);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-brand-500) 45%, transparent);
+  pointer-events: none;
+  animation: pakurdu-caret 1s step-end infinite;
+  will-change: opacity, transform;
+}
+
+@keyframes pakurdu-caret {
+  0%, 48% { opacity: 1; }
+  49%, 100% { opacity: 0; }
+}
+
+/* Reference-style workspace: typography is primary; stats and keyboard are
+   deliberately quieter so the user sees one clear typing task. */
+.typing-interface .typing-stats-header {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.typing-interface .typing-secondary-panel {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.typing-interface .typing-display-global {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  contain: layout;
+}
+
+/* Smooth, constant-speed marquee. */
+.word-marquee__track {
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+  transform: translate3d(0,0,0);
+  will-change: transform;
+}
+.word-marquee__word {
+  transition: transform var(--motion-ui) var(--ease-premium), border-color var(--motion-ui) var(--ease-ui), box-shadow var(--motion-ui) var(--ease-ui), background-color var(--motion-ui) var(--ease-ui);
+}
+
+/* Global micro-interaction baseline for common controls. */
+button,
+a,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================================
+   Favicon and Urdu typography contract
+   ========================================================= */
+
+html[lang="ur"],
+body[lang="ur"],
+[lang="ur"] {
+  font-feature-settings: "ccmp" 1, "calt" 1, "liga" 1, "rlig" 1, "kern" 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing-scroll-track,
+  .typing-cursor,
+  .word-marquee__track {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Issue 5: premium motion curve for the existing UI primitives. */
+.transition-colors { transition-duration: var(--motion-ui); transition-timing-function: var(--ease-ui); }
+.transition-all { transition-duration: var(--motion-ui); transition-timing-function: var(--ease-premium); }
+
+/* Issue 8: the typing stage is intentionally open, with no card chrome. */
+.typing-interface {
+  position: relative;
+}
+.typing-interface .typing-stats-header > * {
+  min-width: 0;
+}
+.typing-interface .typing-stats-header > * > :first-child {
+  box-shadow: none !important;
+}
+.typing-interface .typing-stats-header [class*="rounded"] {
+  border-color: transparent !important;
+  background: transparent !important;
+}
+.typing-interface .typing-stats-header svg {
+  display: none;
+}
+
+/* The active word/cursor is the focus point; typed text recedes. */
+.typing-interface .typing-run--correct { opacity: .58; }
+.typing-interface .typing-run--pending { color: var(--color-ink); opacity: .86; }
+.typing-interface .typing-run--incorrect { color: var(--color-error-600); opacity: .9; }
+
+@media (prefers-reduced-motion: reduce) {
+  .transition-colors,
+  .transition-all { transition: none !important; }
+}
