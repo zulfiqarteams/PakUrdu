@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/cn";
-import { getUrduForKey, keyboardRows, shiftPhoneticMap, type ExpectedKey } from "@/features/keyboard/data/phoneticMap";
+import { getUrduForKey, keyboardRows, type ExpectedKey } from "@/features/keyboard/data/phoneticMap";
 import type { PressedKey } from "@/features/keyboard/hooks/usePressedKey";
 
 interface VirtualKeyboardProps {
@@ -15,11 +15,22 @@ export function VirtualKeyboard({ pressedKey, expectedKey, sizeVariant = "defaul
   const compact = sizeVariant === "compact";
   const interactive = Boolean(onKeyPress);
   const [touchShift, setTouchShift] = useState(false);
+  const [touchCtrl, setTouchCtrl] = useState(false);
+  const [touchAlt, setTouchAlt] = useState(false);
   const shiftHeld = Boolean(pressedKey?.shift) || touchShift;
+  const ctrlHeld = Boolean(pressedKey?.ctrl) || touchCtrl;
+  const altHeld = Boolean(pressedKey?.alt) || touchAlt;
+  const extendedHeld = ctrlHeld || altHeld;
+  const altGrShiftHeld = extendedHeld && shiftHeld;
   const shiftActive = pressedKey?.key === "shift" || shiftHeld;
+  const ctrlActive = pressedKey?.key === "ctrl" || ctrlHeld;
+  const altActive = pressedKey?.key === "alt" || altHeld;
+  const expectedCtrl = Boolean(expectedKey?.ctrl);
+  const expectedAlt = Boolean(expectedKey?.alt);
 
   const press = (key: string) => {
-    const value = shiftHeld && shiftPhoneticMap[key] !== undefined ? shiftPhoneticMap[key] : getUrduForKey(key);
+    const layer = altGrShiftHeld ? "altgrShift" : extendedHeld ? "altgr" : shiftHeld ? "shift" : "base";
+    const value = getUrduForKey(key, layer);
     if (!value) return;
     onKeyPress?.(value);
     if (touchShift) setTouchShift(false);
@@ -32,15 +43,11 @@ export function VirtualKeyboard({ pressedKey, expectedKey, sizeVariant = "defaul
     <div dir="ltr" className={cn("w-full select-none", gap)}>
       {keyboardRows.map((row, rowIndex) => (
         <div key={rowIndex} className={cn("flex w-full", gap)}>
-          {rowIndex === keyboardRows.length - 1 && (
-            <ModifierKey label="Shift" active={shiftActive} expected={Boolean(expectedKey?.shift)} height={keyHeight} interactive={interactive} onPress={() => setTouchShift((v) => !v)} />
-          )}
           {row.map((key) => {
             const active = pressedKey?.key === key;
             const expected = expectedKey?.key === key;
-            const base = getUrduForKey(key);
-            const shifted = shiftPhoneticMap[key];
-            const shown = shiftHeld && shifted !== undefined ? shifted : base;
+            const layer = altGrShiftHeld ? "altgrShift" : extendedHeld ? "altgr" : shiftHeld ? "shift" : "base";
+            const shown = getUrduForKey(key, layer) ?? getUrduForKey(key, "base");
             return (
               <button
                 key={key}
@@ -57,15 +64,19 @@ export function VirtualKeyboard({ pressedKey, expectedKey, sizeVariant = "defaul
                   !active && expected && "keyboard-premium-key--expected",
                 )}
               >
-                <span className={cn("keyboard-premium-urdu", compact ? "text-[clamp(16px,2.8vh,22px)]" : "text-[18px] sm:text-[21px]", active && "text-white")} dir="rtl" lang="ur">
-                  <span className={cn("keyboard-premium-face", shiftHeld && shifted !== undefined ? "keyboard-premium-face--shift" : "keyboard-premium-face--base")}>{shown}</span>
+                <span className={cn("keyboard-premium-urdu", compact ? "text-[clamp(16px,2.8vh,22px)]" : "text-[18px] sm:text-[21px]", (shown?.length ?? 0) > 2 && "keyboard-premium-urdu--ligature", active && "text-white")} dir="rtl" lang="ur">
+                  <span className={cn("keyboard-premium-face", layer !== "base" ? "keyboard-premium-face--shift" : "keyboard-premium-face--base")}>{shown}</span>
                 </span>
                 <span className={cn("absolute bottom-1 right-1.5 font-mono text-[8px] uppercase leading-none sm:text-[9px]", active ? "text-white/65" : "text-ink-faint")}>{key}</span>
               </button>
             );
           })}
           {rowIndex === keyboardRows.length - 1 && (
-            <ModifierKey label="Shift" active={shiftActive} expected={Boolean(expectedKey?.shift)} height={keyHeight} interactive={interactive} onPress={() => setTouchShift((v) => !v)} />
+            <>
+              <ModifierKey label="Shift" active={shiftActive} expected={Boolean(expectedKey?.shift)} height={keyHeight} interactive={interactive} onPress={() => setTouchShift((v) => !v)} />
+              <ModifierKey label="Alt" active={altActive} expected={expectedAlt} height={keyHeight} interactive={interactive} onPress={() => setTouchAlt((v) => !v)} />
+              <ModifierKey label="Ctrl" active={ctrlActive} expected={expectedCtrl} height={keyHeight} interactive={interactive} onPress={() => setTouchCtrl((v) => !v)} />
+            </>
           )}
         </div>
       ))}

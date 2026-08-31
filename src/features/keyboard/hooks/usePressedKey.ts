@@ -5,6 +5,8 @@ import { getPhysicalKeyLabel } from "@/features/keyboard/data/phoneticMap";
 export interface PressedKey {
   key: string;
   shift: boolean;
+  ctrl: boolean;
+  alt: boolean;
 }
 
 /**
@@ -38,11 +40,15 @@ export function usePressedKey(enabled: boolean, resetKey?: string | number): Pre
   // active.
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const [shiftHeld, setShiftHeld] = useState(false);
+  const [ctrlHeld, setCtrlHeld] = useState(false);
+  const [altHeld, setAltHeld] = useState(false);
 
   useEffect(() => {
     if (!enabled) {
       setActiveKey(null);
       setShiftHeld(false);
+      setCtrlHeld(false);
+      setAltHeld(false);
       return;
     }
 
@@ -50,6 +56,7 @@ export function usePressedKey(enabled: boolean, resetKey?: string | number): Pre
       if (event.code === "Space" || event.key === " ") return "space";
       if (event.key === "Shift") return "shift";
       if (event.key === "Control") return "ctrl";
+      if (event.key === "Alt") return "alt";
       return getPhysicalKeyLabel(event.code) ?? (event.key.length === 1 ? event.key.toLowerCase() : null);
     }
 
@@ -59,9 +66,21 @@ export function usePressedKey(enabled: boolean, resetKey?: string | number): Pre
         setActiveKey("shift");
         return;
       }
+      if (event.key === "Control") {
+        setCtrlHeld(true);
+        setActiveKey("ctrl");
+        return;
+      }
+      if (event.key === "Alt") {
+        setAltHeld(true);
+        setActiveKey("alt");
+        return;
+      }
       const key = normalize(event);
       if (key) setActiveKey(key);
       if (event.shiftKey) setShiftHeld(true);
+      if (event.ctrlKey) setCtrlHeld(true);
+      if (event.altKey) setAltHeld(true);
     }
 
     function handleKeyUp(event: KeyboardEvent) {
@@ -70,17 +89,31 @@ export function usePressedKey(enabled: boolean, resetKey?: string | number): Pre
         setActiveKey((current) => (current === "shift" ? null : current));
         return;
       }
+      if (event.key === "Control") {
+        setCtrlHeld(false);
+        setActiveKey((current) => (current === "ctrl" ? null : current));
+        return;
+      }
+      if (event.key === "Alt") {
+        setAltHeld(false);
+        setActiveKey((current) => (current === "alt" ? null : current));
+        return;
+      }
       const key = normalize(event);
       setActiveKey((current) => (current === key ? null : current));
       // Defensive: `event.shiftKey` reflects Shift's real state at
       // this keyup too, in case Shift's own keyup was ever missed
       // (e.g. a browser/OS shortcut stole it).
       if (!event.shiftKey) setShiftHeld(false);
+      if (!event.ctrlKey) setCtrlHeld(false);
+      if (!event.altKey) setAltHeld(false);
     }
 
     function clearPressedKey() {
       setActiveKey(null);
       setShiftHeld(false);
+      setCtrlHeld(false);
+      setAltHeld(false);
     }
 
     window.addEventListener("keydown", handleKeyDown);
@@ -95,6 +128,6 @@ export function usePressedKey(enabled: boolean, resetKey?: string | number): Pre
     };
   }, [enabled, resetKey]);
 
-  if (activeKey === null && !shiftHeld) return null;
-  return { key: activeKey ?? "shift", shift: shiftHeld };
+  if (activeKey === null && !shiftHeld && !ctrlHeld && !altHeld) return null;
+  return { key: activeKey ?? (ctrlHeld ? "ctrl" : altHeld ? "alt" : "shift"), shift: shiftHeld, ctrl: ctrlHeld, alt: altHeld };
 }

@@ -27,8 +27,11 @@ import { useLanguage } from "@/i18n/useLanguage";
 
 const LEVELS = ["beginner", "intermediate", "advanced", "expert"] as const;
 const TIMER_OPTIONS = [60, 120, 300, 600, 0] as const;
+const CUSTOM_TIMER = -1;
+const CUSTOM_MIN_MINUTES = 1;
+const CUSTOM_MAX_MINUTES = 30;
 type Level = typeof LEVELS[number];
-type TimerSeconds = typeof TIMER_OPTIONS[number];
+type TimerSeconds = number;
 
 function speak(text: string) {
   if (!("speechSynthesis" in window)) return false;
@@ -109,16 +112,20 @@ function TimedTypingPractice({ bio, chapterIndex, level, onComplete }: { bio: Bi
   const targetText = levelText && chapterIndex === 0 ? levelText : current.text;
   const typing = useTypingEngine({ targetText });
   const [selectedTimer, setSelectedTimer] = useState<TimerSeconds>(300);
+  const [customMinutes, setCustomMinutes] = useState(2);
   const [started, setStarted] = useState(false);
   const [expired, setExpired] = useState(false);
   const [isCaptureActive, setIsCaptureActive] = useState(false);
   const pressed = usePressedKey(isCaptureActive);
   const expected = getExpectedKey(typing.characters[typing.currentIndex]?.char ?? "");
   const finger = expected?.key && expected.key !== "space" ? fingerForKey(expected.key) : null;
-  const elapsedTimer = useTypingTimer({ hasStarted: started && typing.currentIndex > 0, isComplete: typing.isComplete || expired, resetKey: `${bio.id}-${current.id}-${level}-${started}`, durationMs: selectedTimer > 0 ? selectedTimer * 1000 : undefined, onExpire: () => setExpired(true) });
+  const selectedDurationSeconds = selectedTimer === CUSTOM_TIMER
+    ? Math.min(Math.max(customMinutes, CUSTOM_MIN_MINUTES), CUSTOM_MAX_MINUTES) * 60
+    : selectedTimer;
+  const elapsedTimer = useTypingTimer({ hasStarted: started && typing.currentIndex > 0, isComplete: typing.isComplete || expired, resetKey: `${bio.id}-${current.id}-${level}-${started}-${selectedDurationSeconds}`, durationMs: selectedDurationSeconds > 0 ? selectedDurationSeconds * 1000 : undefined, onExpire: () => setExpired(true) });
   const keyboardTapInput = useKeyboardTapInput(typing, soundEnabled, elapsedTimer.canAcceptInput);
   const elapsedSeconds = elapsedTimer.elapsedMs / 1000;
-  const remainingSeconds = selectedTimer === 0 ? 0 : Math.max(0, selectedTimer - elapsedSeconds);
+  const remainingSeconds = selectedDurationSeconds === 0 ? 0 : Math.max(0, selectedDurationSeconds - elapsedSeconds);
   const cpm = calculateCPM(typing.sessionKeystrokes, elapsedTimer.elapsedMs);
   const wpm = calculateWPM(typing.sessionKeystrokes, elapsedTimer.elapsedMs);
 
@@ -135,10 +142,10 @@ function TimedTypingPractice({ bio, chapterIndex, level, onComplete }: { bio: Bi
   function start() { typing.reset(); setExpired(false); setStarted(true); }
   function reset() { typing.reset(); setExpired(false); setStarted(false); }
   const sessionFinished = expired || typing.isComplete;
-  const visibleElapsed = selectedTimer === 0 ? elapsedTimer.elapsedMs : Math.min(elapsedTimer.elapsedMs, selectedTimer * 1000);
+  const visibleElapsed = selectedDurationSeconds === 0 ? elapsedTimer.elapsedMs : Math.min(elapsedTimer.elapsedMs, selectedDurationSeconds * 1000);
 
   return <div className="mt-6 rounded-xl border border-border bg-surface p-4 sm:p-6">
-    {!started && !sessionFinished && <div className="space-y-4" dir={direction}><div><h3 className="text-lg font-bold">Writing Practice</h3><p className="mt-1 text-sm text-ink-soft">پہلے سطح اور timer منتخب کریں، پھر اسی biography/chapter کے اصل متن سے typing شروع کریں۔</p></div><div className="grid gap-4 md:grid-cols-2"><div><p className="mb-2 text-sm font-semibold">Difficulty</p><div className="flex flex-wrap gap-2">{LEVELS.map((x) => <button key={x} type="button" onClick={() => { /* level is controlled by parent */ }} className={cn("rounded-md border px-3 py-2 text-sm", x === level ? "border-brand-500 bg-brand-50 text-brand-700" : "border-border text-ink-soft")}>{x[0].toUpperCase()+x.slice(1)}</button>)}</div></div><div><p className="mb-2 text-sm font-semibold">Timer</p><div className="flex flex-wrap gap-2">{TIMER_OPTIONS.map((x) => <button key={x} type="button" onClick={() => setSelectedTimer(x)} className={cn("rounded-md border px-3 py-2 text-sm", selectedTimer === x ? "border-brand-500 bg-brand-50 text-brand-700" : "border-border text-ink-soft")}>{x === 0 ? "No Limit" : `${x / 60} min`}</button>)}</div></div></div><div className="flex flex-wrap gap-2"><Button onClick={start}><Play size={15}/> Start Writing Practice</Button><Button variant="outline" onClick={reset}><TimerReset size={15}/> Reset</Button></div></div>}
+    {!started && !sessionFinished && <div className="space-y-4" dir={direction}><div><h3 className="text-lg font-bold">Writing Practice</h3><p className="mt-1 text-sm text-ink-soft">پہلے سطح اور timer منتخب کریں، پھر اسی biography/chapter کے اصل متن سے typing شروع کریں۔</p></div><div className="grid gap-4 md:grid-cols-2"><div><p className="mb-2 text-sm font-semibold">Difficulty</p><div className="flex flex-wrap gap-2">{LEVELS.map((x) => <button key={x} type="button" onClick={() => { /* level is controlled by parent */ }} className={cn("rounded-md border px-3 py-2 text-sm", x === level ? "border-brand-500 bg-brand-50 text-brand-700" : "border-border text-ink-soft")}>{x[0].toUpperCase()+x.slice(1)}</button>)}</div></div><div><p className="mb-2 text-sm font-semibold">Timer</p><div className="flex flex-wrap gap-2">{TIMER_OPTIONS.map((x) => <button key={x} type="button" onClick={() => setSelectedTimer(x)} className={cn("rounded-md border px-3 py-2 text-sm", selectedTimer === x ? "border-brand-500 bg-brand-50 text-brand-700" : "border-border text-ink-soft")}>{x === 0 ? "No Limit" : `${x / 60} min`}</button>)}<button type="button" onClick={() => setSelectedTimer(CUSTOM_TIMER)} className={cn("rounded-md border px-3 py-2 text-sm", selectedTimer === CUSTOM_TIMER ? "border-brand-500 bg-brand-50 text-brand-700" : "border-border text-ink-soft")}>Custom</button></div>{selectedTimer === CUSTOM_TIMER && <div className="mt-3 flex items-center gap-3 rounded-lg border border-border/60 bg-paper px-3 py-2"><label htmlFor="biography-custom-duration" className="text-xs font-medium text-ink-soft">Custom minutes</label><input id="biography-custom-duration" type="range" min={CUSTOM_MIN_MINUTES} max={CUSTOM_MAX_MINUTES} step={1} value={customMinutes} onChange={(event) => setCustomMinutes(Math.min(Math.max(Number(event.target.value) || CUSTOM_MIN_MINUTES, CUSTOM_MIN_MINUTES), CUSTOM_MAX_MINUTES))} className="min-w-0 flex-1 accent-brand-500"/><span className="w-12 text-right text-xs font-semibold text-brand-700">{customMinutes}m</span></div>}</div></div><div className="flex flex-wrap gap-2"><Button onClick={start}><Play size={15}/> Start Writing Practice</Button><Button variant="outline" onClick={reset}><TimerReset size={15}/> Reset</Button></div></div>}
 
     {started && !sessionFinished && <>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><div><Badge>{level}</Badge><p className="mt-1 text-sm text-ink-soft">Chapter {chapterIndex + 1} / {bio.chapters.length}</p></div><div className="numeric text-lg font-semibold text-ink"><Clock size={16} className="mr-1 inline"/>{selectedTimer === 0 ? formatTime(elapsedSeconds) : formatTime(remainingSeconds)}</div></div>

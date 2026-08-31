@@ -48,7 +48,9 @@ export interface SEOTags {
  * to unit test directly — see `__tests__/useSEO.test.ts`.
  */
 export function buildSEOTags({ title, description, noIndex = false, pathname, structuredData }: SEOInput): SEOTags {
-  const fullTitle = `${title} · ${SITE_NAME}`;
+  // Put the brand first so narrow browser tabs preserve the PAKURDU identity
+  // even when the route-specific title is truncated.
+  const fullTitle = `${SITE_NAME} · ${title}`;
   const canonical = absoluteUrl(pathname);
 
   return {

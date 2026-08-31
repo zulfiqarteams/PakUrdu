@@ -1,6 +1,13 @@
 /** The comparison state of one grapheme in the target text. */
 export type CharacterStatus = "pending" | "current" | "correct" | "incorrect";
 
+/**
+ * How a wrong keystroke is handled (master-spec §3.4).
+ * "lenient": wrong char is recorded and the cursor still advances.
+ * "strict": wrong char is rejected; the cursor stays until corrected.
+ */
+export type TypingStrictness = "lenient" | "strict";
+
 /** One position in the target text, with its live comparison state. */
 export interface TargetCharacter {
   /** Index into the grapheme-segmented target, not a raw string index. */

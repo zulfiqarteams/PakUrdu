@@ -26,14 +26,60 @@ export const shiftPhoneticMap: Record<string, string> = {
   q:"ﷺ",w:"ؐ",e:"ؑ",r:"ڑ",t:"ٹ",y:"َ",u:"ِ",i:"ٰ",o:"ۃ",p:"ُ",a:"آ",s:"ص",d:"ڈ",f:"ٖ",g:"غ",h:"ح",j:"ض",k:"خ",l:"ؒ",m:"ً",n:"ں",b:"ؓ",c:"ث",v:"ظ",x:"ژ",z:"ذ",
   ";":":","'":"”",",":"<",".":">","/":"؟",
 };
+
+/**
+ * CRULP Urdu Phonetic v1.1 AltGr (Right Alt / Ctrl+Alt) face.
+ * The official CRULP reference describes Base + Shift + AltGr, with
+ * honorifics and less-common signs on AltGr. The map below follows that
+ * published extended face; the phrase shortcuts use the documented
+ * Shift+AltGr convention used by the phonetic keyboard family.
+ */
+export const altGrPhoneticMap: Record<string, string> = {
+  "1":"!","2":"@","3":"#","5":"٪","7":"&","8":"*","9":")","0":"(",
+  q:"ٓ",w:"؂",e:"ٰ",r:"ؓ",t:"ؔ",y:"؁",u:"ٔ",i:"ؑ",o:"ٕ",p:"ُ",
+  a:"ﷲ",s:"ؐ",d:"ﷺ",g:"ٛ",h:"ؒ",j:"ﷻ",
+  z:"؏",x:"؎",c:"؃",v:"ؕ",b:"﷽",n:"؀",
+  ",":">",".":"<",
+};
+
+/**
+ * Shift+AltGr phrase layer. These are the complete phrase shortcuts used
+ * by the phonetic keyboard family and preserve the single-key AltGr signs
+ * above. Uppercase means Shift+AltGr on a physical keyboard.
+ */
+export const altGrShiftPhoneticMap: Record<string, string> = {
+  A:"رحمۃ اللہ علیہا",
+  H:"رحمۃ اللہ علیہ",
+  J:"عزوجل",
+  L:"علیہ السلام",
+  R:"رضی اللہ عنہ",
+  T:"رضی اللہ تعالیٰ عنہ",
+};
+
 const physicalCodeToKey: Record<string, string> = {
   Digit1:"1",Digit2:"2",Digit3:"3",Digit4:"4",Digit5:"5",Digit6:"6",Digit7:"7",Digit8:"8",Digit9:"9",Digit0:"0",Minus:"-",Equal:"=",
   KeyQ:"q",KeyW:"w",KeyE:"e",KeyR:"r",KeyT:"t",KeyY:"y",KeyU:"u",KeyI:"i",KeyO:"o",KeyP:"p",KeyA:"a",KeyS:"s",KeyD:"d",KeyF:"f",KeyG:"g",KeyH:"h",KeyJ:"j",KeyK:"k",KeyL:"l",KeyM:"m",KeyN:"n",KeyB:"b",KeyC:"c",KeyV:"v",KeyX:"x",KeyZ:"z",Semicolon:";",Quote:"'",Comma:",",Period:".",Slash:"/",
 };
-export function getUrduForPhysicalKey(code: string, shift = false): string | undefined { const key=physicalCodeToKey[code]; return key ? (shift ? shiftPhoneticMap[key] : phoneticMap[key]) : undefined; }
+export function getUrduForAltGrKey(key: string): string | undefined {
+  const normalized = key.length === 1 ? key.toLowerCase() : key;
+  if (key.length === 1 && key !== normalized) return altGrShiftPhoneticMap[key] ?? altGrPhoneticMap[normalized];
+  return altGrPhoneticMap[normalized];
+}
+export function getUrduForPhysicalKey(code: string, shift = false, altGr = false): string | undefined {
+  const key = physicalCodeToKey[code];
+  if (!key) return undefined;
+  if (altGr) return shift ? getUrduForAltGrKey(key.toUpperCase()) : getUrduForAltGrKey(key);
+  return shift ? shiftPhoneticMap[key] : phoneticMap[key];
+}
 export function getPhysicalKeyLabel(code: string): string | undefined { return physicalCodeToKey[code]; }
-export function getUrduForKey(key: string): string | undefined { const lower=key.toLowerCase(); return key.length===1 && key!==lower ? shiftPhoneticMap[lower] : phoneticMap[lower]; }
-export interface ExpectedKey { key: string; shift: boolean; }
+export function getUrduForKey(key: string, layer: "base" | "shift" | "altgr" | "altgrShift" = "base"): string | undefined {
+  const lower = key.toLowerCase();
+  if (layer === "altgrShift") return altGrShiftPhoneticMap[key] ?? altGrShiftPhoneticMap[lower.toUpperCase()];
+  if (layer === "altgr") return altGrPhoneticMap[lower];
+  if (layer === "shift") return shiftPhoneticMap[lower];
+  return phoneticMap[lower];
+}
+export interface ExpectedKey { key: string; shift: boolean; alt?: boolean; ctrl?: boolean; }
 function buildReverseMap(map: Record<string, string>): Record<string, string> {
   const reverse: Record<string, string> = {};
   for (const [key, value] of Object.entries(map)) {
@@ -43,7 +89,20 @@ function buildReverseMap(map: Record<string, string>): Record<string, string> {
 }
 const reversePhoneticMap = buildReverseMap(phoneticMap);
 const reverseShiftPhoneticMap = buildReverseMap(shiftPhoneticMap);
-export function getExpectedKey(char: string | undefined): ExpectedKey | undefined { if(!char)return undefined; if(char===" ")return {key:"space",shift:false}; const base=reversePhoneticMap[char]; if(base)return {key:base,shift:false}; const shifted=reverseShiftPhoneticMap[char]; return shifted ? {key:shifted,shift:true} : undefined; }
+const reverseAltGrPhoneticMap = buildReverseMap(altGrPhoneticMap);
+const reverseAltGrShiftPhoneticMap = buildReverseMap(altGrShiftPhoneticMap);
+export function getExpectedKey(char: string | undefined): ExpectedKey | undefined {
+  if (!char) return undefined;
+  if (char === " ") return { key: "space", shift: false };
+  const base = reversePhoneticMap[char];
+  if (base) return { key: base, shift: false };
+  const shifted = reverseShiftPhoneticMap[char];
+  if (shifted) return { key: shifted, shift: true };
+  const altGr = reverseAltGrPhoneticMap[char];
+  if (altGr) return { key: altGr, shift: false, alt: true, ctrl: true };
+  const altGrShift = reverseAltGrShiftPhoneticMap[char];
+  return altGrShift ? { key: altGrShift, shift: true, alt: true, ctrl: true } : undefined;
+}
 
 /**
  * Full US-QWERTY physical layout used to lay out

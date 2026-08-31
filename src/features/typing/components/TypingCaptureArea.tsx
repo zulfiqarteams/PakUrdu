@@ -165,8 +165,6 @@ export function TypingCaptureArea({
 
     if (event.metaKey || event.isComposing) return false;
 
-    if (event.ctrlKey || event.altKey) return false;
-
     if (event.key === "Backspace") {
       if (!typing.userInput) return false;
       onTypingActivity?.();
@@ -184,7 +182,7 @@ export function TypingCaptureArea({
       return true;
     }
 
-    const urdu = getUrduForPhysicalKey(event.code, event.shiftKey);
+    const urdu = getUrduForPhysicalKey(event.code, event.shiftKey, event.altKey);
     if (!urdu) return false;
 
     onTypingActivity?.();

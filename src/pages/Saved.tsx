@@ -6,6 +6,7 @@ import { Button } from "@/components/Button";
 import { EmptyState } from "@/components/EmptyState";
 import { getLessonById } from "@/features/lessons";
 import { getBiography } from "@/features/biography";
+import { sahiUrduWords } from "@/features/sahiUrdu/data/words";
 import { loadBookmarkIds, loadSavedLaterIds, toggleBookmark, toggleSavedLater } from "@/features/library/services/savedContent";
 import { loadBiographyProgress, toggleBookmark as toggleBiographyBookmark } from "@/features/biography/services/progress";
 import { loadReadLaterIds, toggleReadLater } from "@/features/biography/services/readLater";
@@ -35,6 +36,7 @@ export default function Saved() {
   const [savedLaterIds, setSavedLaterIds] = useState<string[]>([]);
   const [bioBookmarkIds, setBioBookmarkIds] = useState<string[]>([]);
   const [bioReadLaterIds, setBioReadLaterIds] = useState<string[]>([]);
+  const SAHI_URDU_BOOKMARK_PREFIX = "sahi-urdu:word:";
 
   useEffect(() => {
     setBookmarkIds(loadBookmarkIds());
@@ -63,7 +65,14 @@ export default function Saved() {
     setBioReadLaterIds(loadReadLaterIds());
   }
 
-  const bookmarkedLessons: SavedItem[] = bookmarkIds
+  const sahiUrduBookmarkIds = bookmarkIds.filter((id) => id.startsWith(SAHI_URDU_BOOKMARK_PREFIX));
+  const regularBookmarkIds = bookmarkIds.filter((id) => !id.startsWith(SAHI_URDU_BOOKMARK_PREFIX));
+  const bookmarkedSahiUrduWords: SavedItem[] = sahiUrduBookmarkIds
+    .map((id) => sahiUrduWords.find((word) => word.id === id.slice(SAHI_URDU_BOOKMARK_PREFIX.length)))
+    .filter((word): word is NonNullable<typeof word> => Boolean(word))
+    .map((word) => ({ id: word.id, title: word.correctWord, href: `/sahi-urdu/word/${word.id}`, remove: () => removeBookmark(`${SAHI_URDU_BOOKMARK_PREFIX}${word.id}`) }));
+
+  const bookmarkedLessons: SavedItem[] = regularBookmarkIds
     .map((id) => getLessonById(id))
     .filter((l): l is NonNullable<typeof l> => Boolean(l))
     .map((lesson) => ({ id: lesson.id, title: text(lesson.title), href: `/lesson/${lesson.id}`, remove: () => removeBookmark(lesson.id) }));
@@ -73,9 +82,16 @@ export default function Saved() {
     .filter((b): b is NonNullable<typeof b> => Boolean(b))
     .map((bio) => ({ id: bio.id, title: bio.respectfulName, href: `/biography/${bio.id}`, remove: () => removeBioBookmark(bio.id) }));
 
-  const allBookmarks = [...bookmarkedLessons, ...bookmarkedBiographies];
+  const allBookmarks = [...bookmarkedLessons, ...bookmarkedBiographies, ...bookmarkedSahiUrduWords];
 
-  const savedLaterLessons: SavedItem[] = savedLaterIds
+  const sahiUrduSavedLaterIds = savedLaterIds.filter((id) => id.startsWith(SAHI_URDU_BOOKMARK_PREFIX));
+  const regularSavedLaterIds = savedLaterIds.filter((id) => !id.startsWith(SAHI_URDU_BOOKMARK_PREFIX));
+  const savedLaterSahiUrduWords: SavedItem[] = sahiUrduSavedLaterIds
+    .map((id) => sahiUrduWords.find((word) => word.id === id.slice(SAHI_URDU_BOOKMARK_PREFIX.length)))
+    .filter((word): word is NonNullable<typeof word> => Boolean(word))
+    .map((word) => ({ id: word.id, title: word.correctWord, href: `/sahi-urdu/word/${word.id}`, remove: () => removeSavedLater(`${SAHI_URDU_BOOKMARK_PREFIX}${word.id}`) }));
+
+  const savedLaterLessons: SavedItem[] = regularSavedLaterIds
     .map((id) => getLessonById(id))
     .filter((l): l is NonNullable<typeof l> => Boolean(l))
     .map((lesson) => ({ id: lesson.id, title: text(lesson.title), href: `/lesson/${lesson.id}`, remove: () => removeSavedLater(lesson.id) }));
@@ -85,7 +101,7 @@ export default function Saved() {
     .filter((b): b is NonNullable<typeof b> => Boolean(b))
     .map((bio) => ({ id: bio.id, title: bio.respectfulName, href: `/biography/${bio.id}`, remove: () => removeBioReadLater(bio.id) }));
 
-  const allSavedLater = [...savedLaterLessons, ...savedLaterBiographies];
+  const allSavedLater = [...savedLaterLessons, ...savedLaterBiographies, ...savedLaterSahiUrduWords];
 
   return (
     <PageContainer>
@@ -119,7 +135,7 @@ export default function Saved() {
               ))}
             </div>
           ) : (
-            <EmptyState icon={Bookmark} title={text("No bookmarks yet")} description={text("Bookmark a lesson from its page to see it here.")} />
+            <EmptyState icon={Bookmark} title={text("No bookmarks yet")} description={text("Bookmark a lesson or Correct Urdu word from its page to see it here.")} />
           )}
         </section>
 
@@ -150,7 +166,7 @@ export default function Saved() {
               ))}
             </div>
           ) : (
-            <EmptyState icon={Save} title={text("Nothing saved for later")} description={text("Use \"Save for Later\" on a lesson to see it here.")} />
+            <EmptyState icon={Save} title={text("Nothing saved for later")} description={text("Use Save for Later on a lesson or Correct Urdu word to see it here.")} />
           )}
         </section>
       </div>

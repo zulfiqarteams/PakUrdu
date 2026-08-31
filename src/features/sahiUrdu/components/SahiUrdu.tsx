@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Filter, Headphones,
   Keyboard, ListChecks, RotateCcw, Search, Sparkles, Target, Trophy,
-  Volume2, XCircle,
+  Volume2, XCircle, Bookmark, BookmarkCheck, Save,
 } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { PageHeader } from "@/components/PageHeader";
@@ -24,16 +24,26 @@ import { VirtualKeyboard, HandFingerGuide, getExpectedKey, fingerForKey, usePres
 import { sahiUrduCategories, sahiUrduWords } from "@/features/sahiUrdu/data/words";
 import { getDailyWords, loadSahiUrduProgress, markViewed, recordPractice, recordQuiz } from "@/features/sahiUrdu/services/progress";
 import type { UrduWord } from "@/features/sahiUrdu/types";
+import { isBookmarked, isSavedLater, toggleBookmark, toggleSavedLater } from "@/features/library/services/savedContent";
+
+const SAHI_URDU_BOOKMARK_PREFIX = "sahi-urdu:word:";
+const wordStorageId = (id: string) => `${SAHI_URDU_BOOKMARK_PREFIX}${id}`;
 
 function speak(word: UrduWord) {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return { started: false, message: "آپ کے browser میں pronunciation speech support دستیاب نہیں۔" };
+  const voices = window.speechSynthesis.getVoices();
+  const urduVoice = voices.find((voice) => voice.lang.toLowerCase() === "ur-pk") ?? voices.find((voice) => voice.lang.toLowerCase().startsWith("ur"));
+  if (!urduVoice) {
+    return { started: false, message: "Urdu pronunciation voice دستیاب نہیں۔ اپنے device/browser میں Urdu text-to-speech voice install کریں۔" };
+  }
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(word.correctWord.replace(/[ًٌٍَُِّْٰٓ]/g, ""));
-  utterance.lang = "ur-PK";
+  utterance.lang = urduVoice.lang || "ur-PK";
+  utterance.voice = urduVoice;
   utterance.rate = 0.72;
   utterance.pitch = 1;
   window.speechSynthesis.speak(utterance);
-  return true;
+  return { started: true, message: "" };
 }
 
 function stripMarks(value: string) {
@@ -180,18 +190,42 @@ function WordDetail({ word }: { word: UrduWord }) {
   const pressedKey = usePressedKey(typing.status !== "idle");
   const expectedKey = getExpectedKey(typingText[typing.currentIndex]);
   const finger = expectedKey && expectedKey.key !== "space" ? fingerForKey(expectedKey.key) : null;
+  const practicePanelRef = useRef<HTMLDivElement>(null);
   const [listening, setListening] = useState(false);
+  const [speechMessage, setSpeechMessage] = useState("");
+  const [bookmarked, setBookmarked] = useState(() => isBookmarked(wordStorageId(word.id)));
+  const [savedLater, setSavedLater] = useState(() => isSavedLater(wordStorageId(word.id)));
 
   useEffect(() => { markViewed(word.id); }, [word.id]);
+  useEffect(() => {
+    setBookmarked(isBookmarked(wordStorageId(word.id)));
+    setSavedLater(isSavedLater(wordStorageId(word.id)));
+  }, [word.id]);
   useEffect(() => {
     if (!typing.isComplete) return;
     recordPractice(word, true);
   }, [typing.isComplete, word]);
 
   function listen() {
-    const started = speak(word);
-    setListening(started);
-    if (started) window.setTimeout(() => setListening(false), 1800);
+    const result = speak(word);
+    setListening(result.started);
+    setSpeechMessage(result.message);
+    if (result.started) window.setTimeout(() => setListening(false), 1800);
+  }
+
+  function focusPractice() {
+    practicePanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => {
+      practicePanelRef.current?.querySelector<HTMLInputElement>("input")?.focus();
+    }, 250);
+  }
+
+  function handleBookmark() {
+    setBookmarked(toggleBookmark(wordStorageId(word.id)));
+  }
+
+  function handleSavedLater() {
+    setSavedLater(toggleSavedLater(wordStorageId(word.id)));
   }
 
   return (
@@ -202,34 +236,45 @@ function WordDetail({ word }: { word: UrduWord }) {
           <Card>
             <div className="flex flex-col items-center text-center" dir={direction}>
               <Badge>{word.formStatus === "wrong" ? "غلط" : word.formStatus === "variant" ? "متبادل صورت" : word.formStatus === "common" ? "عام صورت" : "ترجیحی صورت"}</Badge>
-              <h1 className="urdu-text mt-5 text-6xl font-bold text-ink sm:text-7xl">{word.correctWord}</h1>
-              <p dir="ltr" className="mt-4 text-lg font-medium text-ink-soft">{word.roman ?? "—"}</p>
+              <h1 className="urdu-text mt-5 min-h-[7.5rem] text-6xl font-bold leading-[1.45] text-ink sm:min-h-[9rem] sm:text-7xl sm:leading-[1.4]">{word.correctWord}</h1>
+              <p dir="ltr" className="mt-5 text-lg font-medium leading-8 text-ink-soft">{word.roman ?? "—"}</p>
               <div className="mt-5 flex flex-wrap justify-center gap-2">
                 <Button variant="outline" onClick={listen}><Volume2 size={17}/>{listening ? "سنایا جا رہا ہے…" : "تلفظ سنیں"}</Button>
-                <Button to={`/sahi-urdu/word/${word.id}/practice`} variant="primary"><Keyboard size={17}/>Type It</Button>
+                <Button onClick={focusPractice} variant="primary"><Keyboard size={17}/>Type It</Button>
               </div>
-              <p className="mt-4 text-sm text-ink-soft">{word.meaningUrdu ?? word.meaning}</p>
-              <p dir="ltr" className="mt-1 text-sm text-ink-faint">{word.meaning}</p>
+              {speechMessage && <p role="status" className="mt-3 max-w-md text-sm leading-7 text-brand-700">{speechMessage}</p>}
+              <div className="mt-5 grid w-full max-w-xl gap-3 sm:grid-cols-2">
+                <div className="rounded-md border border-brand-200 bg-brand-50 p-3 text-start">
+                  <Button variant={bookmarked ? "primary" : "outline"} size="sm" onClick={handleBookmark}><>{bookmarked ? <BookmarkCheck size={16}/> : <Bookmark size={16}/>} {bookmarked ? "Bookmarked" : "Bookmark"}</></Button>
+                  <p className="mt-2 text-xs leading-5 text-brand-800">Bookmark اس لفظ کو ایک مستقل فہرست میں محفوظ کرتا ہے تاکہ آپ اسے بعد میں دوبارہ آسانی سے ڈھونڈ سکیں۔</p>
+                </div>
+                <div className="rounded-md border border-border-strong bg-paper p-3 text-start">
+                  <Button variant={savedLater ? "primary" : "outline"} size="sm" onClick={handleSavedLater}><Save size={16}/>{savedLater ? "Saved" : "Save for Later"}</Button>
+                  <p className="mt-2 text-xs leading-5 text-ink-soft">Save for Later اس لفظ کو بعد میں واپس آ کر پڑھنے اور practice مکمل کرنے کے لیے رکھتا ہے۔</p>
+                </div>
+              </div>
+              <p className="mt-5 text-sm leading-8 text-ink-soft">{word.meaningUrdu ?? word.meaning}</p>
+              <p dir="ltr" className="mt-1 text-sm leading-7 text-ink-faint">{word.meaning}</p>
             </div>
           </Card>
 
           <Card className="mt-6" dir={direction}>
             <CardHeader><CardTitle>یہ لفظ کیسے سیکھیں؟</CardTitle></CardHeader>
-            {word.explanation && <p className="leading-8 text-ink">{word.explanation}</p>}
-            {word.commonWrongForms?.length ? <div className="mt-5 rounded-md border border-error-200 bg-error-50 p-4"><p className="text-sm font-semibold text-error-700">عام غلط صورت</p><p className="urdu-text mt-2 text-2xl text-error-700">{word.commonWrongForms.join("، ")}</p></div> : null}
-            {word.commonForms?.length ? <div className="mt-5 rounded-md border border-border bg-paper p-4"><p className="text-sm font-semibold text-ink-soft">عام / متبادل صورتیں</p><p className="urdu-text mt-2 text-2xl text-ink">{word.commonForms.join("، ")}</p></div> : null}
-            {word.diacritics && <div className="mt-5 rounded-md border border-brand-100 bg-brand-50 p-4"><p className="text-sm font-semibold text-brand-700">اعراب کے ساتھ</p><p className="urdu-text mt-2 text-3xl font-semibold text-brand-800">{word.diacritics}</p></div>}
-            {word.examples?.map((example) => <div key={example} className="mt-5 rounded-md border border-gold-300 bg-gold-100 p-4"><p className="text-xs font-semibold text-gold-600">مثال</p><p className="urdu-text mt-2 text-lg leading-8 text-ink">{example}</p></div>)}
+            {word.explanation && <p className="leading-9 text-ink">{word.explanation}</p>}
+            {word.commonWrongForms?.length ? <div className="mt-5 rounded-md border border-brand-300 bg-brand-50 p-4"><p className="text-sm font-semibold text-brand-800">عام غلط صورت</p><p className="urdu-text mt-3 text-2xl leading-[2] text-brand-800">{word.commonWrongForms.join("، ")}</p></div> : null}
+            {word.commonForms?.length ? <div className="mt-5 rounded-md border border-border bg-paper p-4"><p className="text-sm font-semibold text-ink-soft">عام / متبادل صورتیں</p><p className="urdu-text mt-3 text-2xl leading-[2] text-ink">{word.commonForms.join("، ")}</p></div> : null}
+            {word.diacritics && <div className="mt-5 rounded-md border border-brand-200 bg-brand-50 p-4"><p className="text-sm font-semibold text-brand-800">اعراب کے ساتھ</p><p className="urdu-text mt-3 text-3xl font-semibold leading-[2] text-brand-800">{word.diacritics}</p></div>}
+            {word.examples?.map((example) => <div key={example} className="mt-5 rounded-md border border-brand-300 bg-brand-50 p-4"><p className="text-xs font-semibold text-brand-700">مثال</p><p className="urdu-text mt-3 text-lg leading-9 text-ink">{example}</p></div>)}
           </Card>
         </div>
 
-        <div>
+        <div ref={practicePanelRef}>
           <Card>
             <CardHeader><CardTitle>اب یہ لفظ ٹائپ کریں</CardTitle><CardDescription>اعراب والے الفاظ کے لیے typing exercise بنیادی حرفی صورت سے مشق شروع کرتی ہے؛ اعراب الگ Unicode practice میں شامل ہیں۔</CardDescription></CardHeader>
             <TypingCaptureArea typing={typing} suppressNativeKeyboardOnTouch>
               <div className="w-full min-w-0 overflow-hidden"><TypingText characters={typing.characters} statusSummary={`${typing.correctCharacters} درست، ${typing.currentIndex} میں سے۔`} /></div>
             </TypingCaptureArea>
-            <div className="mt-5"><VirtualKeyboard pressedKey={pressedKey} expectedKey={expectedKey} onKeyPress={typing.typeCharacter} onBackspace={typing.backspace} /></div>
+            <div className="mt-5"><VirtualKeyboard pressedKey={pressedKey} expectedKey={expectedKey} sizeVariant="compact" onKeyPress={typing.typeCharacter} onBackspace={typing.backspace} /></div>
             <div className="mt-4"><HandFingerGuide activeGuide={finger} /></div>
             <div className="mt-4 flex items-center justify-between text-sm text-ink-soft"><span>Accuracy {typing.accuracy}%</span><span>{typing.currentIndex}/{typing.totalCharacters}</span></div>
             {typing.isComplete && <div className="mt-4 flex items-center justify-between rounded-md bg-brand-50 p-4"><div><p className="font-semibold text-brand-800">مشق مکمل!</p><p className="text-sm text-brand-700">+10 XP</p></div><Button onClick={typing.reset} variant="outline" size="sm"><RotateCcw size={15}/> دوبارہ</Button></div>}

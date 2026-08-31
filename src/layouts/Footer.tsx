@@ -11,7 +11,7 @@ const navigationLinks = [
   { path: "/test", key: "tests" as const },
 ];
 
-const repositoryUrl = "https://github.com/zulfiqarteams/Portfolio_Website";
+const websiteUrl = "https://zulfiqarteams.github.io/Portfolio_Website";
 
 export function Footer() {
   const { t } = useLanguage();
@@ -95,14 +95,14 @@ export function Footer() {
             </p>
 
             <a
-              href={repositoryUrl}
+              href={websiteUrl}
               target="_blank"
               rel="noreferrer"
               className="mt-5 inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-ink-soft transition-all duration-150 hover:border-brand-500/40 hover:bg-brand-50 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60"
-              aria-label="View Zulfiqar Teams repository on GitHub"
+              aria-label="Visit Zulfiqar Teams website"
             >
               <Github size={14} aria-hidden="true" />
-              View repository
+              Visit website
               <ArrowUpRight size={13} aria-hidden="true" />
             </a>
           </section>

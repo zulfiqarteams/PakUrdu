@@ -1,15 +1,16 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Navbar } from "@/layouts/Navbar";
 import { Footer } from "@/layouts/Footer";
 import { useLanguage } from "@/i18n/useLanguage";
 import { installGlobalLocalization } from "@/i18n/globalLocalization";
 import { useEffect, useState } from "react";
 import { AppLoadingOverlay } from "@/components/AppLoadingOverlay";
-import { VideoBackground, VideoBackgroundProvider } from "@/components/VideoBackground";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export function RootLayout() {
   const { language, direction } = useLanguage();
   const [isBooting, setIsBooting] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     document.documentElement.lang = language === "ur" ? "ur" : language === "roman" ? "en" : "en";
@@ -32,18 +33,20 @@ export function RootLayout() {
   }, []);
 
   return (
-    <VideoBackgroundProvider>
-      <div className="relative isolate flex min-h-dvh flex-col">
-        <VideoBackground />
-        <AppLoadingOverlay visible={isBooting} />
-        <div className="relative z-10 flex min-h-dvh flex-col">
-          <Navbar />
-          <main className="flex-1">
+    <div className="relative isolate flex min-h-dvh flex-col">
+      <AppLoadingOverlay visible={isBooting} />
+      <div className="relative z-10 flex min-h-dvh flex-col">
+        <Navbar />
+        <main className="flex-1">
+          {/* keyed on pathname so navigating to a different page (via the
+              still-functional navbar) automatically clears a caught error
+              instead of leaving the fallback stuck until a manual reload. */}
+          <ErrorBoundary key={location.pathname} label="This page">
             <Outlet />
-          </main>
-          <Footer />
-        </div>
+          </ErrorBoundary>
+        </main>
+        <Footer />
       </div>
-    </VideoBackgroundProvider>
+    </div>
   );
 }

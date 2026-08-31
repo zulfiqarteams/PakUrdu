@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Card } from "@/components/Card";
 import { Badge } from "@/components/Badge";
 import { ProgressBar } from "@/components/ProgressBar";
+import { useHoverLift } from "@/hooks/useHoverLift";
 import { cn } from "@/lib/cn";
 import type { LessonDifficulty, LessonStatus } from "@/types";
 
@@ -48,6 +49,7 @@ export function LessonCard({
   const isLocked = resolvedStatus === "locked";
   const isCompleted = resolvedStatus === "completed";
   const isCurrent = resolvedStatus === "current";
+  const liftRef = useHoverLift<HTMLAnchorElement>();
 
   const content = (
     <>
@@ -108,7 +110,7 @@ export function LessonCard({
   }
 
   return (
-    <Link to={to} className="group block" aria-current={isCurrent ? "step" : undefined}>
+    <Link ref={liftRef} to={to} className="group block" aria-current={isCurrent ? "step" : undefined}>
       <Card hover>{content}</Card>
     </Link>
   );

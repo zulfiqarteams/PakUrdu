@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { gsap } from "@/lib/gsap";
 
 export interface Breadcrumb {
   label: string;
@@ -31,8 +32,32 @@ export function PageHeader({
   breadcrumb,
   action,
 }: PageHeaderProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // Simple one-shot fade+slide-up entrance on mount. gsap.context() scopes
+  // the tween to this instance and ctx.revert() on cleanup ensures React
+  // StrictMode's dev double-invoke (mount -> cleanup -> mount) never leaves
+  // a duplicate or orphaned tween behind.
+  //
+  // Reduced-motion check matches the plain window.matchMedia pattern used
+  // by useHoverLift/useScrollFadeIn (and index.css) — skipping the tween
+  // entirely leaves the header at its normal, fully-visible resting state.
+  useLayoutEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        rootRef.current,
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+      );
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <div className="border-b border-border pb-8 pt-10 sm:pt-14">
+    <div ref={rootRef} className="border-b border-border pb-8 pt-10 sm:pt-14">
       {breadcrumb && breadcrumb.length > 0 && (
         <nav aria-label="Breadcrumb" className="mb-3">
           <ol className="flex flex-wrap items-center gap-1.5 text-sm text-ink-faint">

@@ -418,7 +418,10 @@
      here and can make dotted/descending letters look clipped. */
   .learn-target-glyph {
     display: inline-block;
-    line-height: 1.8;
+    min-height: 7rem;
+    line-height: 2.2;
+    padding-block: 0.25rem 0.5rem;
+    margin-bottom: 0.75rem;
     white-space: nowrap;
     overflow: visible;
     font-kerning: normal;
@@ -626,7 +629,7 @@ html[dir="rtl"] .directional-icon {
 .keyboard-premium-key,.keyboard-premium-modifier,.keyboard-premium-space{background:var(--vk-key, color-mix(in srgb, var(--color-paper) 92%, var(--color-surface) 8%));border-color:var(--vk-border, var(--color-border));box-shadow:0 1px 0 color-mix(in srgb, white 16%, transparent),0 2px 5px color-mix(in srgb, black 10%, transparent);color:var(--color-ink)}
 .keyboard-premium-key--expected,.keyboard-premium-modifier--expected{border-color:var(--color-brand-500);background:var(--color-brand-50);box-shadow:0 0 0 1px color-mix(in srgb,var(--color-brand-500) 12%,transparent)}
 .keyboard-premium-key--pressed,.keyboard-premium-modifier--pressed{background:var(--color-brand-500);border-color:var(--color-brand-500);color:white;transform:translateY(1px) scale(.985)}
-.keyboard-premium-urdu{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;direction:rtl;unicode-bidi:normal;font-family:theme("fontFamily.urdu");font-kerning:normal;letter-spacing:normal;word-spacing:normal;font-variant-ligatures:common-ligatures contextual;font-feature-settings:"ccmp" 1,"calt" 1,"liga" 1,"rlig" 1,"kern" 1;font-synthesis:none;text-rendering:optimizeLegibility}
+.keyboard-premium-urdu{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;direction:rtl;unicode-bidi:normal;font-family:theme("fontFamily.urdu");font-kerning:normal;letter-spacing:normal;word-spacing:normal;font-variant-ligatures:common-ligatures contextual;font-feature-settings:"ccmp" 1,"calt" 1,"liga" 1,"rlig" 1,"kern" 1;font-synthesis:none;text-rendering:optimizeLegibility}.keyboard-premium-urdu--ligature{font-size:clamp(10px,1.7vh,16px);line-height:1;white-space:nowrap;word-break:keep-all;overflow:visible;transform:scaleX(.96)}
 .keyboard-premium-face{transition:opacity 150ms ease,transform 150ms ease}.keyboard-premium-face--base{opacity:1;transform:translateY(0)}.keyboard-premium-face--shift{opacity:1;transform:translateY(0)}
 .keyboard-premium-key .keyboard-premium-face--shift{animation:keyboard-face-in 150ms ease}.keyboard-premium-space{background:var(--color-surface)}
 @keyframes keyboard-face-in{from{opacity:.15;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
@@ -636,6 +639,17 @@ html[dir="rtl"] .directional-icon {
 
 /* PAKURDU brand motion: subtle, purposeful, and disabled by the global
  * prefers-reduced-motion rule above. */
+@keyframes pakurdu-home-tagline-word {
+  0% { opacity: 0; transform: translateY(0.3rem); }
+  18% { opacity: 1; transform: translateY(0); }
+  82% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-0.25rem); }
+}
+
+.home-tagline-word {
+  animation: pakurdu-home-tagline-word 2.3s var(--ease-premium) both;
+}
+
 @keyframes pakurdu-brand-breathe {
   0%, 100% { transform: translateY(0) scale(0.98); opacity: 0.88; }
   50% { transform: translateY(-6px) scale(1.03); opacity: 1; }
@@ -667,115 +681,6 @@ html[dir="rtl"] .directional-icon {
   border-radius: 0 0 100% 100%;
   opacity: 0.9;
   pointer-events: none;
-}
-
-/* =========================================================
- * PakUrdu cinematic MP4 background
- * The background is isolated in its own stacking context so the
- * negative z-index remains behind the app shell, not behind <body>.
- * ========================================================= */
-.video-background-wrapper {
-  position: fixed;
-  inset: 0;
-  z-index: -50;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-  pointer-events: none;
-  background: #0b131a;
-  isolation: isolate;
-}
-
-.main-bg-video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  opacity: 0;
-  transform: translate3d(0, 0, 0) scale(1.015);
-  will-change: opacity, transform;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  filter: saturate(0.72) contrast(0.94) brightness(0.78);
-  transition: opacity 500ms ease, filter 700ms ease;
-}
-
-.main-bg-video--ready {
-  opacity: 0.85;
-}
-
-/*
- * This shield used to sit at 85% opacity with a 12px blur on top of a
- * video already capped at 72% opacity — net result, the cinematic
- * background was barely perceptible under normal browsing (only
- * `--focus` mode, used during active typing tests, is meant to dim it
- * this heavily). Lightened so the video actually reads as a video;
- * `--focus` keeps its stronger dim/blur since that one's intentional
- * (reduces distraction while typing).
- */
-.video-overlay-shield {
-  position: absolute;
-  inset: 0;
-  background: rgba(11, 19, 26, 0.5);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  transition:
-    background-color 700ms cubic-bezier(0.22, 1, 0.36, 1),
-    backdrop-filter 700ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.video-background-wrapper--focus .main-bg-video {
-  opacity: 0.42;
-  filter: saturate(0.48) contrast(0.92) brightness(0.62);
-}
-
-.video-background-wrapper--focus .video-overlay-shield {
-  background: rgba(11, 19, 26, 0.95);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-
-@media (max-width: 768px) {
-  .main-bg-video {
-    opacity: 0;
-    object-position: center center;
-    filter: saturate(0.60) contrast(0.94) brightness(0.70);
-  }
-
-  .main-bg-video--ready {
-    opacity: 0.68;
-  }
-
-  .video-overlay-shield {
-    background: rgba(11, 19, 26, 0.6);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-  }
-
-  .video-background-wrapper--focus .main-bg-video {
-    opacity: 0.30;
-  }
-
-  .video-background-wrapper--focus .video-overlay-shield {
-    background: rgba(11, 19, 26, 0.96);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .main-bg-video {
-    display: none;
-  }
-
-  .video-overlay-shield {
-    background: #0b131a;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    transition: none;
-  }
 }
 
 /* =========================================================
@@ -834,7 +739,7 @@ html[dir="rtl"] .directional-icon {
 }
 
 .typing-run--pending {
-  color: var(--color-ink-soft);
+  color: var(--color-ink);
 }
 
 .typing-run--correct {
@@ -842,11 +747,23 @@ html[dir="rtl"] .directional-icon {
 }
 
 .typing-run--incorrect {
-  color: var(--color-error-600);
-  text-decoration-line: underline;
-  text-decoration-style: wavy;
+  color: var(--color-ink);
+  text-decoration-line: line-through;
   text-decoration-thickness: 2px;
-  text-underline-offset: .14em;
+  text-decoration-color: currentColor;
+  text-decoration-skip-ink: none;
+  text-decoration-offset: .08em;
+  animation: typing-incorrect-settle 320ms ease-out forwards;
+}
+
+@keyframes typing-incorrect-settle {
+  0% { opacity: 1; }
+  35% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing-run--incorrect { animation: none; opacity: 0.6; }
 }
 
 .typing-run--current {
@@ -879,7 +796,7 @@ html[dir="rtl"] .directional-icon {
 
 .typing-cursor {
   position: absolute;
-  left: 62%;
+  left: 0;
   top: 0;
   width: 2px;
   border-radius: 999px;
@@ -888,6 +805,83 @@ html[dir="rtl"] .directional-icon {
   pointer-events: none;
   animation: pakurdu-caret 1s step-end infinite;
   will-change: opacity, transform;
+  /* The cursor now moves on its own (dead-zone scrolling — see
+     TypingText.tsx) instead of always sitting at a CSS-fixed spot, so
+     it needs its own short transition to glide between characters
+     within the dead zone, matching the track's 110ms so the two never
+     look out of sync when a re-center does happen. */
+  transition: transform 110ms var(--ease-ui);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing-cursor { transition: none !important; }
+}
+
+/* Master-spec §3.5/§3.3: multi-line stream layout. Unlike the
+   single-line `.typing-cursor` above (fixed `left: 62%`, only ever
+   moves vertically), this cursor moves in both axes — X tracks the
+   real measured glyph position directly (no shift needed: lines wrap
+   at a fixed width, so each character's X is already correct), Y is
+   pinned at the stream's scroll anchor. Both animate via `transform`
+   only, so this stays compositor-friendly. */
+.typing-cursor--stream {
+  left: 0;
+  top: 0;
+  transition: transform 130ms var(--ease-ui);
+}
+
+.typing-stream-viewport {
+  contain: layout;
+  isolation: isolate;
+  overflow: hidden;
+  max-height: clamp(13rem, 38vh, 18rem);
+  /* A partially-visible line at the very bottom (by design — lets the
+     learner see 1-2 upcoming lines, see STREAM_ANCHOR_RATIO_Y above)
+     was being hard-clipped mid-glyph, which for Nastaliq's tall,
+     diagonally-joined letterforms reads as a "cracked"/broken letter
+     rather than a normal text clip. Fading it out over the last ~15%
+     of the viewport instead means a partial line trails off smoothly
+     — never a hard cut through the middle of a glyph. Top edge fades
+     too, for the (rarer) case a line is mid-scroll past the anchor.
+     mask-image only affects rendering, not layout/measurement, so
+     this doesn't touch any of the cursor-position math above. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black 8%,
+    black 85%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black 8%,
+    black 85%,
+    transparent 100%
+  );
+}
+
+.typing-stream-viewport--compact {
+  min-height: 10.5rem;
+  max-height: clamp(10.5rem, 30vh, 14rem);
+}
+
+.typing-stream-track {
+  position: relative;
+  white-space: normal;
+  word-break: keep-all;
+  transform: translate3d(0, var(--typing-shift-y, 0px), 0);
+  will-change: transform;
+  /* Matches `.typing-scroll-track`'s 110ms — fast enough that fast
+     typing never outruns the scroll, slow enough to still read as
+     motion rather than a jump. */
+  transition: transform 110ms var(--ease-ui);
+  padding-inline: 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing-stream-track,
+  .typing-cursor--stream { transition: none !important; }
 }
 
 @keyframes pakurdu-caret {
@@ -975,9 +969,11 @@ body[lang="ur"],
 /* The active word/cursor is the focus point; typed text recedes. */
 .typing-interface .typing-run--correct { opacity: .58; }
 .typing-interface .typing-run--pending { color: var(--color-ink); opacity: .86; }
-.typing-interface .typing-run--incorrect { color: var(--color-error-600); opacity: .9; }
+.typing-interface .typing-run--incorrect { color: var(--color-ink); opacity: .6; }
 
 @media (prefers-reduced-motion: reduce) {
+  .home-tagline-word { animation: none !important; }
+
   .transition-colors,
   .transition-all { transition: none !important; }
 }

@@ -15,11 +15,10 @@ just enough to satisfy those requirements, not a full keyboard-layout system:
   standard behind Windows' built-in Urdu Phonetic keyboard, InPage, and
   open implementations like Navees) — its Base face (`phoneticMap`) and
   Shift face (`shiftPhoneticMap`), plus a QWERTY row layout including the
-  common punctuation keys (`,` `.` `/` `!`). This app only models two
-  levels, so CRULP's third (AltGr) face is out of scope, with one
-  documented exception (`ؤ`, moved from AltGr+W to Shift+W since lesson
-  content needs it and this app has no AltGr) — see the file's own doc
-  comment for the source and the full reasoning.
+  common punctuation keys (`,` `.` `/` `!`). The app also models CRULP's
+  third AltGr (Right Alt / Ctrl+Alt) face through `altGrPhoneticMap` and
+  `altGrShiftPhoneticMap`; physical and on-screen Ctrl/Alt modifiers use
+  the same extended layer. See the file's own doc comment for sources.
 - `hooks/usePressedKey.ts` — tracks the currently-held physical key (and
   whether Shift is held with it), only while explicitly `enabled` (i.e.
   while the typing capture input is focused), so this doesn't add a

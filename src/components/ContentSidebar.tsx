@@ -90,48 +90,7 @@ function SidebarContent({ activeLessonId, activeReadingId, onNavigate }: Content
     >
       <div className="max-h-[calc(100vh-7rem)] overflow-y-auto rounded-md border border-border bg-paper p-2 shadow-card overscroll-contain">
         <div>
-          <SectionToggle expanded={tutorialOpen} onClick={() => setTutorialOpen((open) => !open)}>
-            {text("Typing Tutorial")}
-          </SectionToggle>
-          <div
-            className={cn(
-              "grid overflow-hidden transition-[grid-template-rows,opacity] duration-200 ease-out",
-              tutorialOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-            )}
-          >
-            <div className="min-h-0 overflow-hidden pb-1 pl-2">
-              {tutorialTracks.map((track) => {
-                const isActive =
-                  activeTrack === track.id ||
-                  (location.pathname === "/learn" &&
-                    new URLSearchParams(location.search).get("track") === track.id);
 
-                return (
-                  <NavLink
-                    key={track.id}
-                    to={`/learn?track=${track.id}`}
-                    onClick={onNavigate}
-                    className={cn(
-                      "block rounded-sm px-3 py-2 text-sm transition-colors",
-                      isActive
-                        ? "bg-brand-50 font-semibold text-brand-700"
-                        : "text-ink-soft hover:bg-surface hover:text-ink",
-                    )}
-                  >
-                    <span>{text(track.label)}</span>
-                    {activeTrack === track.id && activeLesson && (
-                      <span className="mt-0.5 block truncate text-[11px] font-normal text-brand-600">
-                        {text("Current: ")}{text(activeLesson.title)}
-                      </span>
-                    )}
-                  </NavLink>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-1 border-t border-border pt-1">
           <SectionToggle expanded={readingOpen} onClick={() => setReadingOpen((open) => !open)}>
             {text("Learn About Phonetic Keyboard")}
           </SectionToggle>
@@ -171,6 +130,48 @@ function SidebarContent({ activeLessonId, activeReadingId, onNavigate }: Content
                 );
               })}
             </nav>
+          </div>
+        </div>
+
+        <div className="mt-1 border-t border-border pt-1">
+          <SectionToggle expanded={tutorialOpen} onClick={() => setTutorialOpen((open) => !open)}>
+            {text("Typing Tutorial")}
+          </SectionToggle>
+          <div
+            className={cn(
+              "grid overflow-hidden transition-[grid-template-rows,opacity] duration-200 ease-out",
+              tutorialOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+            )}
+          >
+            <div className="min-h-0 overflow-hidden pb-1 pl-2">
+              {tutorialTracks.map((track) => {
+                const isActive =
+                  activeTrack === track.id ||
+                  (location.pathname === "/learn" &&
+                    new URLSearchParams(location.search).get("track") === track.id);
+
+                return (
+                  <NavLink
+                    key={track.id}
+                    to={`/learn?track=${track.id}`}
+                    onClick={onNavigate}
+                    className={cn(
+                      "block rounded-sm px-3 py-2 text-sm transition-colors",
+                      isActive
+                        ? "bg-brand-50 font-semibold text-brand-700"
+                        : "text-ink-soft hover:bg-surface hover:text-ink",
+                    )}
+                  >
+                    <span>{text(track.label)}</span>
+                    {activeTrack === track.id && activeLesson && (
+                      <span className="mt-0.5 block truncate text-[11px] font-normal text-brand-600">
+                        {text("Current: ")}{text(activeLesson.title)}
+                      </span>
+                    )}
+                  </NavLink>
+                );
+              })}
+            </div>
           </div>
         </div>
 

@@ -52,8 +52,14 @@ export function useTypingSession({
   const elapsedMs = Number.isFinite(durationMs) && durationMs !== undefined
     ? Math.min(timer.elapsedMs, Math.max(0, durationMs))
     : timer.elapsedMs;
-  const wpm = calculateWPM(typing.sessionKeystrokes, elapsedMs);
-  const cpm = calculateCPM(typing.sessionKeystrokes, elapsedMs);
+  // Very short lesson steps (one character or a few keystrokes) produce
+  // mathematically valid but misleadingly volatile WPM/CPM because the
+  // denominator is only a few hundred milliseconds. Keep the real
+  // calculation for normal sessions, but expose zero until a small,
+  // meaningful sample exists.
+  const hasMeaningfulSample = typing.sessionKeystrokes >= 5 && elapsedMs >= 2000;
+  const wpm = hasMeaningfulSample ? calculateWPM(typing.sessionKeystrokes, elapsedMs) : 0;
+  const cpm = hasMeaningfulSample ? calculateCPM(typing.sessionKeystrokes, elapsedMs) : 0;
   const remainingMs = durationMs === undefined ? 0 : Math.max(durationMs - elapsedMs, 0);
 
   const reset = useCallback(() => {

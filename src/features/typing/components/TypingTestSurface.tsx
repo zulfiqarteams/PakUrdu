@@ -15,7 +15,7 @@ interface TypingTestSurfaceProps {
   expectedKey?: ExpectedKey;
   pressedKey?: PressedKey | null;
   sizeVariant?: "default" | "compact";
-  layout?: "scroll" | "line" | "default";
+  layout?: "scroll" | "line" | "default" | "stream";
   statusSummary?: string;
   typingFeedback?: boolean;
   canType?: () => boolean;
@@ -41,7 +41,11 @@ export function TypingTestSurface({
   expectedKey,
   pressedKey,
   sizeVariant = "default",
-  layout = "scroll",
+  // Master-spec §3.5/§3.8: continuous multi-line stream is the new
+  // app-wide default, replacing the single-line horizontal-scroll
+  // pattern the spec explicitly rejects. Screens that still want the
+  // old single-line behavior can opt back in with layout="scroll".
+  layout = "stream",
   statusSummary,
   typingFeedback = true,
   canType,
@@ -86,7 +90,7 @@ export function TypingTestSurface({
               {keyboardTitle}
             </span>
             <span className="text-xs font-normal text-ink-faint">
-              {expectedKey?.shift ? "Shift" : "Keyboard"}
+              {expectedKey?.alt ? `AltGr +${expectedKey.shift ? " Shift +" : ""}` : expectedKey?.shift ? "Shift" : "Keyboard"}
             </span>
           </summary>
           <div className="mt-4">

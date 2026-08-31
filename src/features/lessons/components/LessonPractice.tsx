@@ -15,8 +15,6 @@ import type { Lesson, LessonStep } from "@/features/lessons/types";
 import type { TypingMistake } from "@/features/typing/types";
 import { segmentText } from "@/features/typing/utils/graphemes";
 import { useLanguage } from "@/i18n/useLanguage";
-import { WordMarquee } from "@/components/WordMarquee";
-import { wordsFromText, buildCharacterMarqueeWords } from "@/data/marqueeWords";
 
 interface LessonPracticeProps {
   lesson: Lesson;
@@ -295,17 +293,6 @@ export function LessonPractice({ lesson, nextLessonId }: LessonPracticeProps) {
   const stepDone = completedSteps.has(stepIndex);
   const isCurrentTyping = Boolean(activeStep.target);
   const statusSummary = stepCanComplete ? "Step complete." : typing.currentIndex === 0 ? `${typing.totalCharacters} characters` : `${typing.correctCharacters} correct · ${typing.incorrectCharacters} incorrect`;
-  const lessonMarqueeWords = wordsFromText(
-    [activeStep.target, ...(activeStep.examples ?? []).map((example) => example.urdu)].filter(Boolean).join(" "),
-    20,
-  );
-  const lessonMarqueeCharacters = buildCharacterMarqueeWords(
-    [
-      ...(lesson.introducedCharacters ?? []),
-      ...(activeStep.character ? [activeStep.character] : []),
-    ],
-    20,
-  );
 
   return (
     <div className="space-y-4">
@@ -336,7 +323,7 @@ export function LessonPractice({ lesson, nextLessonId }: LessonPracticeProps) {
           {lesson.type === "character" && stepIndex === 0 ? (
             <div className="text-center">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-faint">{text(`Learn ${activeStep.character ? activeStep.title.replace(/^Learn\s+/, "") : lesson.title.split(" — ")[0]}`)}</p>
-              <div className="mt-2 flex min-h-[9rem] items-center justify-center overflow-visible sm:min-h-[10rem]">
+              <div className="mt-2 flex min-h-[13.5rem] items-center justify-center overflow-visible sm:min-h-[16rem]">
                 <span
                   className="learn-target-glyph urdu-text text-7xl leading-[1.8] text-brand-700 sm:text-8xl"
                   dir="rtl"
@@ -345,8 +332,8 @@ export function LessonPractice({ lesson, nextLessonId }: LessonPracticeProps) {
                   {activeStep.character}
                 </span>
               </div>
-              <p className="mt-1 text-sm font-semibold text-ink">{text(`Say: ${activeStep.title.replace(/^Learn\s+/, "")}`)}</p>
-              <p className="mt-1 text-sm text-ink-soft">{text("Press")} <kbd className="rounded border border-border bg-paper px-2 py-0.5 font-semibold text-ink">{activeStep.expectedKey?.shift ? `Shift + ${activeStep.expectedKey.key.toUpperCase()}` : activeStep.expectedKey?.key.toUpperCase() ?? activeStep.phonetic}</kbd></p>
+              <p className="mt-4 text-sm font-semibold text-ink">{text(`Say: ${activeStep.title.replace(/^Learn\s+/, "")}`)}</p>
+              <p className="mt-1 text-sm text-ink-soft">{text("Press")} <kbd className="rounded border border-border bg-paper px-2 py-0.5 font-semibold text-ink">{activeStep.expectedKey?.alt ? `${activeStep.expectedKey.shift ? "Shift + " : ""}AltGr + ${activeStep.expectedKey.key.toUpperCase()}` : activeStep.expectedKey?.shift ? `Shift + ${activeStep.expectedKey.key.toUpperCase()}` : activeStep.expectedKey?.key.toUpperCase() ?? activeStep.phonetic}</kbd></p>
             </div>
           ) : (
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -378,20 +365,14 @@ export function LessonPractice({ lesson, nextLessonId }: LessonPracticeProps) {
 
         {isCurrentTyping ? (
           <div className="min-w-0 p-4 sm:p-5">
-            <WordMarquee
-              context="lesson"
-              words={lessonMarqueeWords}
-              lessonCharacters={lessonMarqueeCharacters}
-              label={text("Lesson typing vocabulary")}
-              speed="fast"
-              className="mb-4"
-            />
             <TypingWorkspace
               session={session}
               showKeyboard={showKeyboard}
               statusSummary={statusSummary}
               keyboardTitle={text("Keyboard")}
               showReset={false}
+              sizeVariant="compact"
+              layout="scroll"
             />
           </div>        ) : (
           <div className="grid gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_240px]">
@@ -415,7 +396,7 @@ export function LessonPractice({ lesson, nextLessonId }: LessonPracticeProps) {
                 <div className="rounded-xl border border-border bg-paper p-3 sm:p-4">
                   <div className="mb-3 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 text-sm font-semibold"><Keyboard size={16} aria-hidden="true" /> {text("Keyboard position")}</div>
-                    <span className="text-xs text-ink-faint">{expectedKey?.shift ? text("Hold Shift") : text("Base key")}</span>
+                    <span className="text-xs text-ink-faint">{expectedKey?.alt ? text("Hold AltGr") : expectedKey?.shift ? text("Hold Shift") : text("Base key")}</span>
                   </div>
                   <VirtualKeyboard pressedKey={null} expectedKey={expectedKey} />
                 </div>

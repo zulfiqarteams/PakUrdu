@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { RotateCcw } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -8,9 +7,6 @@ import type { UseTypingSessionResult } from "@/features/typing/hooks/useTypingSe
 import type { ExpectedKey } from "@/features/keyboard/data/phoneticMap";
 import { HandFingerGuide, fingerForKey } from "@/features/keyboard";
 import { useSettings } from "@/features/settings";
-import { HomeRowProgress } from "@/components/HomeRowProgress";
-import { useVideoBackground } from "@/components/VideoBackground";
-import { useLocation } from "react-router-dom";
 
 export interface TypingWorkspaceProps {
   session: UseTypingSessionResult;
@@ -24,7 +20,7 @@ export interface TypingWorkspaceProps {
   onReset?: () => void;
   statusSummary?: string;
   sizeVariant?: "default" | "compact";
-  layout?: "scroll" | "line" | "default";
+  layout?: "scroll" | "line" | "default" | "stream";
   expectedKeyOverride?: ExpectedKey;
 }
 
@@ -45,26 +41,13 @@ export function TypingWorkspace({
   onReset,
   statusSummary,
   sizeVariant = "default",
-  layout = "scroll",
+  // See TypingTestSurface's default — same reasoning.
+  layout = "stream",
   expectedKeyOverride,
 }: TypingWorkspaceProps) {
   const { typingFeedback } = useSettings();
-  const location = useLocation();
-  const { setFocusMode } = useVideoBackground();
-  const isDeepTestRoute = location.pathname === "/test";
   const expectedKey = expectedKeyOverride ?? session.expectedKey;
 
-  useEffect(() => {
-    if (!isDeepTestRoute || session.ended) {
-      setFocusMode(false);
-    }
-  }, [isDeepTestRoute, session.ended, setFocusMode]);
-
-  const handleTypingActivity = () => {
-    if (isDeepTestRoute && !session.ended) {
-      setFocusMode(true);
-    }
-  };
   const activeFinger = expectedKey ? fingerForKey(expectedKey.key) : null;
   const summary = statusSummary ?? (
     session.ended
@@ -88,14 +71,7 @@ export function TypingWorkspace({
         mode="header"
       />
 
-      {showKeyboard && (
-        <HomeRowProgress
-          className="mt-3"
-          currentIndex={session.typing.currentIndex}
-          totalCharacters={session.typing.totalCharacters}
-          expectedKey={expectedKey?.key}
-        />
-      )}
+
 
       {/* 2. Shared text-first typing surface. */}
       <TypingTestSurface
@@ -111,7 +87,6 @@ export function TypingWorkspace({
         canType={session.timer.canAcceptInput}
         isLocked={session.ended}
         onActiveChange={session.setCaptureActive}
-        onTypingActivity={handleTypingActivity}
         onKeyPress={session.keyboardTap.onKeyPress}
         onBackspace={session.keyboardTap.onBackspace}
       />

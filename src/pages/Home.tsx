@@ -3,7 +3,10 @@ import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/Button";
 import { Badge } from "@/components/Badge";
 import { HeroTypingWidget } from "@/components/home/HeroTypingWidget";
+import { AnimatedTagline } from "@/components/home/AnimatedTagline";
+import { FeaturesGrid } from "@/components/home/FeaturesGrid";
 import { useSEO } from "@/hooks/useSEO";
+import { useScrollFadeIn } from "@/hooks/useScrollFadeIn";
 import { useProfiles } from "@/features/profiles/context/ProfileContext";
 import { useProgress, getContinueLearningCta } from "@/features/progress";
 import { useLanguage } from "@/i18n/useLanguage";
@@ -23,10 +26,17 @@ export default function Home() {
     completedLessonCount: progress.completedLessonCount,
   });
 
+  // Secondary stats section sits below the primary CTA and is typically
+  // below the fold — a genuine scroll-triggered entrance, unlike the
+  // above-the-fold hero/CTA section which stays untouched.
+  const statsSectionRef = useScrollFadeIn<HTMLElement>();
+
   return (
     <main dir={direction} className={isUrdu ? "urdu-body" : undefined}>
       {/* Primary action: the homepage opens directly on a live typing test. */}
       <HeroTypingWidget />
+
+      <AnimatedTagline />
 
       <PageContainer className="py-8 sm:py-12">
         <section className="mx-auto flex max-w-3xl flex-col items-center text-center">
@@ -59,8 +69,10 @@ export default function Home() {
           </div>
         </section>
 
+        <FeaturesGrid />
+
         {/* Secondary information is deliberately compact and below the primary action. */}
-        <section className="mx-auto mt-10 max-w-3xl border-t border-border/60 pt-6">
+        <section ref={statsSectionRef} className="mx-auto mt-10 max-w-3xl border-t border-border/60 pt-6">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <LineChart size={17} className="mx-auto text-brand-500" aria-hidden="true" />

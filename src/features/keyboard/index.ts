@@ -1,4 +1,4 @@
-export { phoneticMap, shiftPhoneticMap, keyboardRows, getUrduForKey, getUrduForPhysicalKey, getPhysicalKeyLabel, getExpectedKey } from "@/features/keyboard/data/phoneticMap";
+export { phoneticMap, shiftPhoneticMap, altGrPhoneticMap, altGrShiftPhoneticMap, keyboardRows, getUrduForKey, getUrduForAltGrKey, getUrduForPhysicalKey, getPhysicalKeyLabel, getExpectedKey } from "@/features/keyboard/data/phoneticMap";
 export type { ExpectedKey } from "@/features/keyboard/data/phoneticMap";
 export { fingerForKey } from "@/features/keyboard/data/fingerGuide";
 export type { Hand, Finger, FingerGuide } from "@/features/keyboard/data/fingerGuide";

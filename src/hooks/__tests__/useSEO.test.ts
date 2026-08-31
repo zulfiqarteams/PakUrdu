@@ -36,9 +36,9 @@ function test(name: string, fn: TestFn): void {
 
 // --- Title ------------------------------------------------------------------
 
-test("Test 1 — title gets the site name suffix appended", () => {
+test("Test 1 — title keeps the site brand first for narrow tabs", () => {
   const tags = buildSEOTags({ title: "Learn Urdu Typing", pathname: "/learn" });
-  assertEqual(tags.fullTitle, `Learn Urdu Typing · ${SITE_NAME}`);
+  assertEqual(tags.fullTitle, `${SITE_NAME} · Learn Urdu Typing`);
 });
 
 test("Test 2 — og:title and twitter:title match the full (suffixed) title, not the raw one", () => {
@@ -117,7 +117,7 @@ test("Test 11 — LessonDetail-style dynamic title/description round-trips corre
     pathname: "/lesson/alphabet-01-alif",
     noIndex: false,
   });
-  assertEqual(tags.fullTitle, `${lessonTitle} · ${SITE_NAME}`);
+  assertEqual(tags.fullTitle, `${SITE_NAME} · ${lessonTitle}`);
   assertEqual(tags.description, lessonDescription);
   assertEqual(tags.robots, "index, follow");
   assertEqual(tags.canonical, `${SITE_URL}/lesson/alphabet-01-alif`);

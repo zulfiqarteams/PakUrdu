@@ -31,7 +31,7 @@
  *   TSX_TSCONFIG_PATH=./tsconfig.app.json npx tsx src/features/typing/core/__tests__/phoneticCapture.test.ts
  */
 import { getTypingState } from "../typingEngine";
-import { getUrduForAltGrKey, getUrduForKey, getUrduForPhysicalKey, phoneticMap } from "@/features/keyboard/data/phoneticMap";
+import { getExpectedKey, getUrduForAltGrKey, getUrduForKey, getUrduForPhysicalKey, phoneticMap } from "@/features/keyboard/data/phoneticMap";
 import { segmentText } from "../../utils/graphemes";
 
 function assertEqual<T>(actual: T, expected: T, message?: string): void {
@@ -147,6 +147,15 @@ test("extended AltGr layer maps Urdu diacritics and honorific signs", () => {
   assertEqual(getUrduForAltGrKey("h"), "ؒ");
   assertEqual(getUrduForAltGrKey("j"), "ﷻ");
   assertEqual(getUrduForAltGrKey("b"), "﷽");
+});
+
+test("expected-key lookup recognizes AltGr and Shift+AltGr layers", () => {
+  const ﷺ = getExpectedKey("ﷺ");
+  assertTrue(Boolean(ﷺ?.alt && ﷺ?.ctrl), "ﷺ should require AltGr");
+  assertEqual(ﷺ?.key, "d");
+  const phrase = getExpectedKey("عزوجل");
+  assertTrue(Boolean(phrase?.alt && phrase?.ctrl && phrase?.shift), "عزوجل should require Shift+AltGr");
+  assertEqual(phrase?.key, "j");
 });
 
 test("extended AltGr phrase shortcuts emit the complete respectful phrase", () => {

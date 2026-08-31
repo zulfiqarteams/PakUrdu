@@ -7,14 +7,16 @@ import {
   mergeMistakes,
   removeLastCharacter,
 } from "@/features/typing/core/typingEngine";
-import type { TypingMistake, TypingState } from "@/features/typing/types";
+import type { TypingMistake, TypingState, TypingStrictness } from "@/features/typing/types";
 
 interface UseTypingEngineOptions {
   targetText: string;
+  /** @default "lenient" — see `appendCharacter`'s doc comment in core/typingEngine.ts. */
+  strictness?: TypingStrictness;
 }
 
 type TypingAction =
-  | { type: "type"; char: string }
+  | { type: "type"; char: string; strictness: TypingStrictness }
   | { type: "backspace" }
   | { type: "reset" }
   | { type: "setTarget"; targetText: string };
@@ -57,8 +59,13 @@ function createInitialEngineState(targetText: string): EngineState {
 function reducer(state: EngineState, action: TypingAction): EngineState {
   switch (action.type) {
     case "type": {
-      const nextInput = appendCharacter(state.targetText, state.userInput, action.char);
-      // Rejected (already full, or an empty/falsy character) — no state change.
+      const nextInput = appendCharacter(state.targetText, state.userInput, action.char, action.strictness);
+      // Rejected (already full, empty/falsy character, or — in
+      // "strict" mode — simply wrong) — no state change. In strict
+      // mode this is also the "flash and revert" moment from
+      // master-spec §3.4: nothing to revert because nothing was
+      // ever appended, so the wrong keystroke never becomes visible
+      // as an `incorrect` character in the first place.
       if (nextInput === state.userInput) return state;
 
       const nextTyping = getTypingState(state.targetText, nextInput, action.char);
@@ -128,7 +135,7 @@ export interface UseTypingEngineResult extends EngineState {
  * — it only knows `targetText` in and a `TypingState` (plus session
  * bookkeeping) out.
  */
-export function useTypingEngine({ targetText }: UseTypingEngineOptions): UseTypingEngineResult {
+export function useTypingEngine({ targetText, strictness = "lenient" }: UseTypingEngineOptions): UseTypingEngineResult {
   const [state, dispatch] = useReducer(reducer, targetText, createInitialEngineState);
 
   // If the caller swaps in a new exercise, start a fresh session for
@@ -138,7 +145,10 @@ export function useTypingEngine({ targetText }: UseTypingEngineOptions): UseTypi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetText]);
 
-  const typeCharacter = useCallback((char: string) => dispatch({ type: "type", char }), []);
+  const typeCharacter = useCallback(
+    (char: string) => dispatch({ type: "type", char, strictness }),
+    [strictness],
+  );
   const backspace = useCallback(() => dispatch({ type: "backspace" }), []);
   const reset = useCallback(() => dispatch({ type: "reset" }), []);
 

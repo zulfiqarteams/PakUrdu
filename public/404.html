@@ -6,20 +6,21 @@
     <meta name="robots" content="noindex" />
     <!--
       GitHub Pages serves this file for ANY unknown URL under this
-      project (e.g. someone opens /Portfolio_Website/PakUrdu/learn
-      directly, or refreshes on it). Since GH Pages can't rewrite
-      requests to index.html the way a real server would, we redirect
-      here instead, encoding the real path/query/hash into the query
+      project (e.g. someone opens /PakUrdu/learn directly, or
+      refreshes on it). Since GH Pages can't rewrite requests to
+      index.html the way a real server would, we redirect here
+      instead, encoding the real path/query/hash into the query
       string. index.html's inline script decodes it and restores the
       correct URL via history.replaceState before React Router mounts,
       so the app boots on the right page with no visible flash.
       Technique: https://github.com/rafgraph/spa-github-pages
     -->
     <script>
-      // pathSegmentsToKeep = 2 because this app is deployed two levels
-      // deep: /Portfolio_Website/PakUrdu/... — update this if the repo
-      // or folder structure changes.
-      var pathSegmentsToKeep = 2;
+      // pathSegmentsToKeep = 1 because this app is deployed one level
+      // deep: /PakUrdu/... — this MUST match BASE_PATH in
+      // src/config/site.ts (segment count, not the exact string).
+      // If you ever move the repo/folder, update both together.
+      var pathSegmentsToKeep = 1;
 
       var l = window.location;
       l.replace(

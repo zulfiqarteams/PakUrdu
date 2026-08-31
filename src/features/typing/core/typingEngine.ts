@@ -6,6 +6,7 @@ import type {
   TypingMistake,
   TypingState,
   TypingStatus,
+  TypingStrictness,
 } from "@/features/typing/types";
 
 /**
@@ -158,13 +159,40 @@ export function createInitialState(targetText: string): TypingState {
  * unchanged input) once the target's length has been reached, and
  * refuses an empty/falsy `char` — callers can always trust that a
  * changed return value means the character was accepted.
+ *
+ * `strictness` (master-spec §3.4):
+ * - "lenient" (default, matches this app's behavior since before this
+ *   option existed): a wrong keystroke is still appended, marked
+ *   `incorrect`, and the cursor advances past it — the learner keeps
+ *   typing and can go back to fix it later.
+ * - "strict": a wrong keystroke is rejected outright (userInput is
+ *   returned unchanged, exactly like hitting the length cap) — the
+ *   cursor does not advance and the learner must retype the correct
+ *   character before moving on.
+ *
+ * Left as "lenient" everywhere by default: none of this app's screens
+ * asked for blocking behavior, and switching the default would change
+ * the feel of every existing typing surface at once. A screen that
+ * wants "strict" passes it explicitly to `useTypingEngine`.
  */
-export function appendCharacter(targetText: string, userInput: string, char: string): string {
+export function appendCharacter(
+  targetText: string,
+  userInput: string,
+  char: string,
+  strictness: TypingStrictness = "lenient",
+): string {
   if (!char) return userInput;
 
-  const targetLength = segmentText(targetText).length;
+  const targetGraphemes = segmentText(targetText);
   const currentLength = segmentText(userInput).length;
-  if (currentLength >= targetLength) return userInput;
+  if (currentLength >= targetGraphemes.length) return userInput;
+
+  if (strictness === "strict") {
+    const expected = targetGraphemes[currentLength];
+    if (normalizeUrduForComparison(char) !== normalizeUrduForComparison(expected)) {
+      return userInput;
+    }
+  }
 
   return userInput + char;
 }
