@@ -13,7 +13,6 @@ import { useSEO } from "@/hooks/useSEO";
 export default function Games() {
   const { t } = useLanguage();
   const daily = getDailyChallenge();
-  const dailyGame = gameDefinitions.find((game) => game.id === daily.gameId) ?? gameDefinitions[0];
   const history = getGameHistory();
   useSEO({ title: t.games.title, description: t.games.description });
   return <PageContainer>

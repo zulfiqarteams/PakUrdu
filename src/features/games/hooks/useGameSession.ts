@@ -4,6 +4,7 @@ import { calculateCPM, calculateWPM } from "@/features/statistics";
 import { getGameRecord, saveGameRecord } from "../services/gameStorage";
 import { scoreTyping } from "../core/scoring";
 import type { GameId } from "../core/gameTypes";
+import type { UseTypingTimerResult } from "@/features/statistics/hooks/useTypingTimer";
 
 interface Options {
   id: GameId;
@@ -91,7 +92,11 @@ export function useGameSession({ id, targetText, durationSeconds, round, paused,
     startedAtRef.current = null; pausedAtRef.current = null; pausedTotalRef.current = 0; completionRef.current = false; session.reset();
   }, [session.reset]);
 
-  const timer = useMemo(() => ({ canAcceptInput: () => !paused && !gameOver && elapsedMs < durationSeconds * 1000 }), [durationSeconds, elapsedMs, gameOver, paused]);
+  const timer = useMemo<UseTypingTimerResult>(() => ({
+    status: gameOver ? "completed" : paused ? "paused" : started ? "running" : "idle",
+    elapsedMs,
+    canAcceptInput: () => !paused && !gameOver && elapsedMs < durationSeconds * 1000,
+  }), [durationSeconds, elapsedMs, gameOver, paused, started]);
   const view = useMemo(() => ({ ...session, elapsedMs, remainingMs: Math.max(durationSeconds * 1000 - elapsedMs, 0), wpm, cpm, ended: gameOver || paused, expired: gameOver, timer, sessionResetKey: `${id}-${durationSeconds}-${round}`, typing: session.typing, keyboardTap: session.keyboardTap }), [cpm, durationSeconds, elapsedMs, gameOver, id, paused, round, session, timer, wpm]);
 
   return { session: view, gameOver, best, aggregate, accuracy, wpm, cpm, started, finish, restart, remainingMs: Math.max(durationSeconds * 1000 - elapsedMs, 0) };

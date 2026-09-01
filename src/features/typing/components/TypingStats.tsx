@@ -18,6 +18,8 @@ interface TypingStatsProps {
   elapsedMs: number;
   /** Optional count of accepted typing attempts for a live session. */
   typedCharacters?: number;
+  /** Backward-compatible session reset marker; the stats display does not consume it. */
+  resetKey?: string | number;
   mode?: "full" | "header";
 }
 
