@@ -12,8 +12,8 @@
 export const SITE_NAME = "PAKURDU — Urdu Typing Tutorial";
 
 // Deployed at https://zulfiqarteams.github.io/PakUrdu/
-export const BASE_PATH = "/Z_Tech/PakUrdu/";
-export const SITE_URL = "https://zulfiqarteams.github.io/Z_Tech/PakUrdu";
+export const BASE_PATH = "/PakUrdu/";
+export const SITE_URL = "https://zulfiqarteams.github.io/PakUrdu";
 
 export const DEFAULT_DESCRIPTION =
   "Free Urdu typing tutorial with phonetic lessons, a virtual keyboard, guided practice, typing tests, and progress tracking. Learn Urdu typing online at your own pace.";
