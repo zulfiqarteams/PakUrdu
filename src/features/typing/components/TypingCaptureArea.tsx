@@ -5,6 +5,7 @@ import type { UseTypingEngineResult } from "@/features/typing/hooks/useTypingEng
 import { getUrduForPhysicalKey } from "@/features/keyboard";
 import { playBackspaceClick, playErrorClick, playKeyClick } from "@/features/keyboard/utils/keyboardSounds";
 import { useSettings } from "@/features/settings";
+import { useLanguage } from "@/i18n/useLanguage";
 
 interface TypingCaptureAreaProps {
   typing: UseTypingEngineResult;
@@ -30,6 +31,7 @@ interface TypingCaptureAreaProps {
   /** Optional activity callback used by higher-level UI (e.g. test focus mode). */
   onTypingActivity?: () => void;
   children: ReactNode;
+  resetKey?: string | number;
 }
 
 function prefersTouchInput(): boolean {
@@ -78,10 +80,14 @@ export function TypingCaptureArea({
   isLocked = false,
   onTypingActivity,
   children,
+  resetKey = 0,
 }: TypingCaptureAreaProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const previousInputLengthRef = useRef(typing.userInput.length);
   const [isActive, setIsActive] = useState(false);
+  const [hintDismissed, setHintDismissed] = useState(false);
   const { soundEnabled } = useSettings();
+  const { text } = useLanguage();
 
   // Computed once: whether to render the input with `inputMode="none"`.
   // Only takes effect on an actual touch device, so a mouse/keyboard
@@ -89,6 +95,11 @@ export function TypingCaptureArea({
   const [blockNativeKeyboard] = useState(
     () => suppressNativeKeyboardOnTouch && prefersTouchInput(),
   );
+
+  useEffect(() => {
+    if (previousInputLengthRef.current > 0 && typing.userInput.length === 0) setHintDismissed(false);
+    previousInputLengthRef.current = typing.userInput.length;
+  }, [typing.userInput, resetKey]);
 
   useEffect(() => {
     onActiveChange?.(isActive);
@@ -122,6 +133,7 @@ export function TypingCaptureArea({
     }
 
     if (previous.length !== next.length || commonPrefixLength !== previous.length) {
+      setHintDismissed(true);
       onTypingActivity?.();
     }
 
@@ -182,7 +194,9 @@ export function TypingCaptureArea({
       return true;
     }
 
-    const urdu = getUrduForPhysicalKey(event.code, event.shiftKey, event.altKey);
+    const capsLock = event.getModifierState("CapsLock");
+    const effectiveShift = event.shiftKey !== capsLock;
+    const urdu = getUrduForPhysicalKey(event.code, effectiveShift, event.altKey, event.ctrlKey);
     if (!urdu) return false;
 
     onTypingActivity?.();
@@ -227,6 +241,11 @@ export function TypingCaptureArea({
       onPointerDown={() => inputRef.current?.focus()}
     >
       {children}
+      {!isLocked && typing.userInput.length === 0 && !hintDismissed && (
+        <button type="button" onClick={(event) => { event.stopPropagation(); setHintDismissed(true); inputRef.current?.focus(); }} className="typing-start-hint absolute left-1/2 top-2 z-10 -translate-x-1/2 rounded-full border border-brand-500/30 bg-surface/95 px-3 py-1.5 text-xs font-medium text-ink shadow-sm">
+          {text("Start typing from here")}
+        </button>
+      )}
 
       <input
         ref={inputRef}

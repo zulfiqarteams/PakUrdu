@@ -22,6 +22,7 @@ export function Navbar() {
   const navLabel = (path: string) => {
     if (path === "/") return t.nav.home;
     if (path === "/learn") return t.nav.learn;
+    if (path === "/games") return t.nav.games;
     if (path === "/practice") return t.nav.practice;
     if (path === "/test") return t.nav.tests;
     if (path === "/progress") return t.nav.progress;

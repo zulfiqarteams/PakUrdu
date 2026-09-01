@@ -65,10 +65,10 @@ export function getUrduForAltGrKey(key: string): string | undefined {
   if (key.length === 1 && key !== normalized) return altGrShiftPhoneticMap[key] ?? altGrPhoneticMap[normalized];
   return altGrPhoneticMap[normalized];
 }
-export function getUrduForPhysicalKey(code: string, shift = false, altGr = false): string | undefined {
+export function getUrduForPhysicalKey(code: string, shift = false, altGr = false, ctrl = false): string | undefined {
   const key = physicalCodeToKey[code];
   if (!key) return undefined;
-  if (altGr) return shift ? getUrduForAltGrKey(key.toUpperCase()) : getUrduForAltGrKey(key);
+  if (altGr || ctrl) return shift ? getUrduForAltGrKey(key.toUpperCase()) : getUrduForAltGrKey(key);
   return shift ? shiftPhoneticMap[key] : phoneticMap[key];
 }
 export function getPhysicalKeyLabel(code: string): string | undefined { return physicalCodeToKey[code]; }

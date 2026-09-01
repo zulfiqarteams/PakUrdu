@@ -98,6 +98,7 @@ export const ui = {
       related: "متعلقہ موضوعات",
       quiz: "سوانح کوئز",
     },
+    games: { title: "گیمنگ", description: "اردو ٹائپنگ سیکھیں، کھیلیں اور اپنی رفتار و درستگی بہتر بنائیں۔", dailyChallenge: "روزانہ چیلنج", dailyChallengeDescription: "آج کا مختصر چیلنج مکمل کریں اور اپنی ذاتی کارکردگی بہتر کریں۔", playImproveMaster: "کھیلیں • بہتر کریں • ماہر بنیں", letterHunter: "حروف کا شکاری", letterHunterDescription: "ایک ایک اردو حرف تلاش کریں اور phonetic key کی پہچان مضبوط کریں۔", wordRush: "اردو ورڈ رش", wordRushDescription: "درست الفاظ تیزی سے ٹائپ کریں، streak بنائیں اور رفتار بڑھائیں۔", comboMaster: "کومبو ماسٹر", comboMasterDescription: "اسی 95-lesson curriculum کے combinations کو کھیل کے انداز میں پریکٹس کریں۔", typingSprint: "ٹائپنگ اسپرنٹ", typingSprintDescription: "15، 30 یا 60 سیکنڈ کے speed challenge میں اپنی رفتار آزمائیں۔", urduSurvival: "اردو سروائیول", urduSurvivalDescription: "آسان الفاظ سے شروع کریں اور مشکل الفاظ و combinations تک زندہ رہیں۔", score: "اسکور", wpm: "WPM", cpm: "CPM", accuracy: "درستگی", streak: "مسلسل کامیابیاں", lives: "جانیں", time: "وقت", round: "راؤنڈ", keyboard: "آن اسکرین کی بورڈ", backToGames: "گیمنگ پر واپس جائیں", restart: "دوبارہ شروع کریں", gameOver: "گیم ختم", newRecord: "نیا ریکارڈ!", tryAgain: "دوبارہ کھیلیں", history: "حالیہ کھیل", pause: "روکیں", resume: "جاری کریں", paused: "گیم عارضی طور پر روک دی گئی ہے۔" },
     common: {
       previous: "پچھلا",
       next: "اگلا",
@@ -116,6 +117,7 @@ export const ui = {
       lesson: { notFound: "یہ سبق نہیں مل سکا۔", learn: "سیکھیں", what: "آپ کیا سیکھیں گے", description: "یہ سبق صرف پہچان نہیں بلکہ قابلِ استعمال ٹائپنگ عادت بنانے کے لیے تیار کیا گیا ہے۔" },
     },
     nav: {
+      games: "گیمنگ",
       home: "ہوم",
       learn: "سیکھیں",
       practice: "مشق",
@@ -238,6 +240,7 @@ export const ui = {
       related: "Mutaliqa mawazoo",
       quiz: "Sawanih quiz",
     },
+    games: { title: "Gaming", description: "Urdu typing seekhein, khelen aur apni speed aur accuracy behtar banayein.", dailyChallenge: "Daily Challenge", dailyChallengeDescription: "Aaj ka chhota challenge complete karein aur apna personal performance behtar karein.", playImproveMaster: "Khelein • Behtar karein • Master banein", letterHunter: "Letter Hunter", letterHunterDescription: "Urdu letters ko ek ek karke type karein aur phonetic key recognition mazboot karein.", wordRush: "Urdu Word Rush", wordRushDescription: "Sahi words tezi se type karein, streak banayein aur speed barhayein.", comboMaster: "Combo Master", comboMasterDescription: "95-lesson curriculum ke real combinations ko game style mein practice karein.", typingSprint: "Typing Sprint", typingSprintDescription: "15, 30 ya 60 second ke speed challenge mein apni typing azmayein.", urduSurvival: "Urdu Survival", urduSurvivalDescription: "Asaan words se shuru karein aur mushkil words aur combinations tak survive karein.", score: "Score", wpm: "WPM", cpm: "CPM", accuracy: "Accuracy", streak: "Streak", lives: "Lives", time: "Time", round: "Round", keyboard: "On-screen keyboard", backToGames: "Back to Games", restart: "Restart", gameOver: "Game Over", newRecord: "New Record!", tryAgain: "Try Again", history: "Recent Games", pause: "Pause", resume: "Resume", paused: "Game is paused." },
     common: {
       previous: "Pichla",
       next: "Agla",
@@ -256,7 +259,7 @@ export const ui = {
       lesson: { notFound: "Yeh lesson nahi mil saka.", learn: "Seekhein", what: "Aap kya seekhein ge", description: "Yeh lesson sirf recognition nahi balkay usable typing habit banane ke liye tayar kiya gaya hai." },
     },
     nav: {
-      home: "Home", learn: "Seekhein", practice: "Practice", tests: "Tests", progress: "Progress", profile: "Profile", settings: "Settings", createProfile: "Profile banayein", createNewProfile: "Naya profile banayein", switchProfile: "Profile badlein", language: "Zaban", languageAria: "Website ki zaban select karein", saved: "Saved",
+      games: "Gaming", home: "Home", learn: "Seekhein", practice: "Practice", tests: "Tests", progress: "Progress", profile: "Profile", settings: "Settings", createProfile: "Profile banayein", createNewProfile: "Naya profile banayein", switchProfile: "Profile badlein", language: "Zaban", languageAria: "Website ki zaban select karein", saved: "Saved",
     },
     footer: { description: "Urdu phonetic keyboard seekhne ka aik saada aur ba-waqar tareeqa — pehle harf se le kar professional speed tak.", slogan: "Seekhein, practice karein, behtar banein" },
     reading: { title: "Learn About Phonetic Keyboard", description: "Urdu phonetic typing ko samajhne ke liye aik munazzam guide, jise aap practice ke saath parh sakte hain.", chapter: "Bab {current} / {total}", read: "{percent}% parha gaya", tip: "Ahm baat", didYouKnow: "Kya aap jantay hain?", practice: "Aaj ki practice", previous: "Pichla bab", next: "Agla bab", finish: "Lesson mukammal karein" },
@@ -352,6 +355,7 @@ export const ui = {
       related: "Related topics",
       quiz: "Biography Quiz",
     },
+    games: { title: "Gaming", description: "Learn Urdu typing, play, and improve your speed and accuracy.", dailyChallenge: "Daily Challenge", dailyChallengeDescription: "Complete a short challenge today and improve your personal performance.", playImproveMaster: "Play • Improve • Master", letterHunter: "Letter Hunter", letterHunterDescription: "Type Urdu letters one by one to strengthen phonetic key recognition.", wordRush: "Urdu Word Rush", wordRushDescription: "Type complete words quickly, build streaks, and improve speed.", comboMaster: "Combo Master", comboMasterDescription: "Practice real combinations from the 95-lesson curriculum in game form.", typingSprint: "Typing Sprint", typingSprintDescription: "Test your speed in a focused 15, 30, or 60 second challenge.", urduSurvival: "Urdu Survival", urduSurvivalDescription: "Start with easy words and survive as words and combinations become harder.", score: "Score", wpm: "WPM", cpm: "CPM", accuracy: "Accuracy", streak: "Streak", lives: "Lives", time: "Time", round: "Round", keyboard: "On-screen keyboard", backToGames: "Back to Games", restart: "Restart", gameOver: "Game Over", newRecord: "New Record!", tryAgain: "Try Again", history: "Recent Games", pause: "Pause", resume: "Resume", paused: "Game is paused." },
     common: {
       previous: "Previous",
       next: "Next",
@@ -366,10 +370,10 @@ export const ui = {
       progress: { title: "Overall Course Progress", currentLesson: "Current Lesson", continue: "Continue", complete: "You've completed every lesson in the course. Nicely done.", performance: "Performance" },
       profile: { create: "Create Profile", local: "Local profile", edit: "Edit", delete: "Delete", localProfiles: "Local profiles on this device" },
       settings: { profile: "Profile", createOne: "Create one", avatar: "Avatar", save: "Save changes", saved: "Saved", localNote: "Stored locally in this browser. Not sent to any server." },
-      results: { back: "Back to Learning", practice: "Start Practicing", personalBest: "New Personal Best", summary: "Performance Summary", detailed: "Detailed Statistics", lesson: "Lesson", review: "Mistake Review", expected: "Expected", typed: "typed", tryAgain: "Try Again" },
+      results: { back: "Back to Learning", practice: "Start Practicing", personalBest: "New Personal Best", summary: "Performance Summary", detailed: "Detailed Statistics", lesson: "Lesson", review: "Mistake Review", expected: "Expected", typed: "typed", tryAgain: "Try Again", history: "Recent Games", pause: "Pause", resume: "Resume", paused: "Game is paused." },
       lesson: { notFound: "We could not find this lesson.", learn: "Learn", what: "What you will learn", description: "This lesson is designed to build a usable typing habit, not just recognition." },
     },
-    nav: { home: "Home", learn: "Learn", practice: "Practice", tests: "Tests", progress: "Progress", profile: "Profile", settings: "Settings", createProfile: "Create Profile", createNewProfile: "Create new profile", switchProfile: "Switch profile", language: "Language", languageAria: "Choose website language", saved: "Saved" },
+    nav: { games: "Gaming", home: "Home", learn: "Learn", practice: "Practice", tests: "Tests", progress: "Progress", profile: "Profile", settings: "Settings", createProfile: "Create Profile", createNewProfile: "Create new profile", switchProfile: "Switch profile", language: "Language", languageAria: "Choose website language", saved: "Saved" },
     footer: { description: "A simple, thoughtful way to learn the Urdu phonetic keyboard — from your first letter to professional speed.", slogan: "Learn, practice, improve" },
     reading: { title: "Learn About Phonetic Keyboard", description: "A structured guide to understanding Urdu phonetic typing, designed to sit alongside your practice.", chapter: "Chapter {current} of {total}", read: "{percent}% read", tip: "A useful tip", didYouKnow: "Did you know?", practice: "Try this", previous: "Previous chapter", next: "Next chapter", finish: "Finish reading" },
   },

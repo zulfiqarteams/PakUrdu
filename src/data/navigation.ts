@@ -2,6 +2,7 @@ import {
   BookOpen,
   Bookmark,
   Home,
+  Gamepad2,
   LineChart,
   Settings,
   Timer,
@@ -18,6 +19,7 @@ import type { NavItem } from "@/types";
 export const primaryNav: NavItem[] = [
   { label: "Home", path: "/", icon: Home },
   { label: "Learn", path: "/learn", icon: BookOpen },
+  { label: "Games", path: "/games", icon: Gamepad2 },
   { label: "Practice", path: "/practice", icon: Type },
   { label: "Tests", path: "/test", icon: Timer },
   { label: "Progress", path: "/progress", icon: LineChart },

@@ -4,6 +4,8 @@ import { cn } from "@/lib/cn";
 import { TypingCaptureArea } from "@/features/typing/components/TypingCaptureArea";
 import { TypingText } from "@/features/typing/components/TypingText";
 import { VirtualKeyboard } from "@/features/keyboard";
+import { getFeedback } from "@/features/results/core/feedback";
+import { useLanguage } from "@/i18n/useLanguage";
 import type { PressedKey } from "@/features/keyboard";
 import type { ExpectedKey } from "@/features/keyboard/data/phoneticMap";
 import type { UseTypingEngineResult } from "@/features/typing/hooks/useTypingEngine";
@@ -26,6 +28,10 @@ interface TypingTestSurfaceProps {
   onBackspace?: () => void;
   footer?: ReactNode;
   className?: string;
+  timerExpired?: boolean;
+  wpm?: number;
+  accuracy?: number;
+  resetKey?: string | number;
 }
 
 /**
@@ -56,7 +62,12 @@ export function TypingTestSurface({
   onBackspace,
   footer,
   className,
+  timerExpired = false,
+  wpm = 0,
+  accuracy,
+  resetKey = 0,
 }: TypingTestSurfaceProps) {
+  const { text } = useLanguage();
   const summary = statusSummary ?? `${typing.correctCharacters} correct, ${typing.incorrectCharacters} incorrect, ${typing.currentIndex} typed.`;
 
   return (
@@ -64,12 +75,14 @@ export function TypingTestSurface({
       <div className="typing-display-global min-w-0 px-1 py-4 sm:px-2 sm:py-6">
         <TypingCaptureArea
           typing={typing}
+          resetKey={resetKey}
           onActiveChange={onActiveChange}
           suppressNativeKeyboardOnTouch={showKeyboard}
           canType={canType}
           isLocked={isLocked}
           onTypingActivity={onTypingActivity}
         >
+          {pressedKey?.capsLock && <div role="status" className="mb-2 text-center text-xs font-semibold text-brand-700">{text("CapsLock is on")}</div>}
           <div className="w-full min-w-0 overflow-hidden">
             <TypingText
               characters={typing.characters}
@@ -81,6 +94,12 @@ export function TypingTestSurface({
           </div>
         </TypingCaptureArea>
       </div>
+
+      {timerExpired && (
+        <div role="status" className="typing-timeout-feedback mt-3 rounded-xl border border-brand-500/30 bg-brand-50/70 p-3 text-sm text-ink shadow-sm">
+          {(() => { const feedback = getFeedback({ accuracy: accuracy ?? typing.sessionAccuracy, wpm, isPersonalBest: false }); return <><p className="font-semibold">{feedback.message}</p><p className="mt-1 text-ink-soft" dir="rtl">{text(feedback.message)}</p></>; })()}
+        </div>
+      )}
 
       {showKeyboard && (
         <details className="typing-secondary-panel mt-4 rounded-xl border border-border/60 bg-surface/45 p-3 sm:p-4">

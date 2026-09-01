@@ -7,6 +7,8 @@ export interface PressedKey {
   shift: boolean;
   ctrl: boolean;
   alt: boolean;
+  capsLock: boolean;
+  lastKey?: string;
 }
 
 /**
@@ -42,6 +44,8 @@ export function usePressedKey(enabled: boolean, resetKey?: string | number): Pre
   const [shiftHeld, setShiftHeld] = useState(false);
   const [ctrlHeld, setCtrlHeld] = useState(false);
   const [altHeld, setAltHeld] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
+  const [lastKey, setLastKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (!enabled) {
@@ -49,6 +53,8 @@ export function usePressedKey(enabled: boolean, resetKey?: string | number): Pre
       setShiftHeld(false);
       setCtrlHeld(false);
       setAltHeld(false);
+      setCapsLock(false);
+      setLastKey(null);
       return;
     }
 
@@ -61,23 +67,27 @@ export function usePressedKey(enabled: boolean, resetKey?: string | number): Pre
     }
 
     function handleKeyDown(event: KeyboardEvent) {
+      setCapsLock(event.getModifierState("CapsLock"));
       if (event.key === "Shift") {
         setShiftHeld(true);
         setActiveKey("shift");
+        setLastKey("shift");
         return;
       }
       if (event.key === "Control") {
         setCtrlHeld(true);
         setActiveKey("ctrl");
+        setLastKey("ctrl");
         return;
       }
       if (event.key === "Alt") {
         setAltHeld(true);
         setActiveKey("alt");
+        setLastKey("alt");
         return;
       }
       const key = normalize(event);
-      if (key) setActiveKey(key);
+      if (key) { setActiveKey(key); setLastKey(key); }
       if (event.shiftKey) setShiftHeld(true);
       if (event.ctrlKey) setCtrlHeld(true);
       if (event.altKey) setAltHeld(true);
@@ -107,6 +117,7 @@ export function usePressedKey(enabled: boolean, resetKey?: string | number): Pre
       if (!event.shiftKey) setShiftHeld(false);
       if (!event.ctrlKey) setCtrlHeld(false);
       if (!event.altKey) setAltHeld(false);
+      setCapsLock(event.getModifierState("CapsLock"));
     }
 
     function clearPressedKey() {
@@ -114,6 +125,8 @@ export function usePressedKey(enabled: boolean, resetKey?: string | number): Pre
       setShiftHeld(false);
       setCtrlHeld(false);
       setAltHeld(false);
+      setCapsLock(false);
+      setLastKey(null);
     }
 
     window.addEventListener("keydown", handleKeyDown);
@@ -128,6 +141,6 @@ export function usePressedKey(enabled: boolean, resetKey?: string | number): Pre
     };
   }, [enabled, resetKey]);
 
-  if (activeKey === null && !shiftHeld && !ctrlHeld && !altHeld) return null;
-  return { key: activeKey ?? (ctrlHeld ? "ctrl" : altHeld ? "alt" : "shift"), shift: shiftHeld, ctrl: ctrlHeld, alt: altHeld };
+  if (activeKey === null && !shiftHeld && !ctrlHeld && !altHeld && !capsLock && !lastKey) return null;
+  return { key: activeKey ?? (ctrlHeld ? "ctrl" : altHeld ? "alt" : "shift"), shift: shiftHeld, ctrl: ctrlHeld, alt: altHeld, capsLock, lastKey: lastKey ?? undefined };
 }

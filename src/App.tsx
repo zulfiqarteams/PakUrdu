@@ -12,6 +12,8 @@ import Home from "@/pages/Home";
 // first paint only ships what that page needs; the rest is fetched on
 // demand as the person navigates to it.
 const Learn = lazy(() => import("@/pages/Learn"));
+const Games = lazy(() => import("@/pages/Games"));
+const GamePlay = lazy(() => import("@/pages/GamePlay"));
 const Reading = lazy(() => import("@/pages/Reading"));
 const LessonDetail = lazy(() => import("@/pages/LessonDetail"));
 const Practice = lazy(() => import("@/pages/Practice"));
@@ -41,6 +43,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
 
           <Route path="/learn" element={<Learn />} />
+          <Route path="/games" element={<Games />} />
+          <Route path="/games/:gameId" element={<GamePlay />} />
           <Route path="/learn/phonetic-keyboard" element={<Reading />} />
           <Route path="/learn/reading" element={<Navigate to="/learn/phonetic-keyboard" replace />} />
           <Route path="/sahi-urdu/*" element={<SahiUrdu />} />

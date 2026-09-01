@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "@/i18n/useLanguage";
 import { cn } from "@/lib/cn";
 import { getUrduForKey, keyboardRows, type ExpectedKey } from "@/features/keyboard/data/phoneticMap";
 import type { PressedKey } from "@/features/keyboard/hooks/usePressedKey";
@@ -13,15 +14,18 @@ interface VirtualKeyboardProps {
 
 export function VirtualKeyboard({ pressedKey, expectedKey, sizeVariant = "default", onKeyPress, onBackspace }: VirtualKeyboardProps) {
   const compact = sizeVariant === "compact";
+  const { text } = useLanguage();
   const interactive = Boolean(onKeyPress);
   const [touchShift, setTouchShift] = useState(false);
   const [touchCtrl, setTouchCtrl] = useState(false);
   const [touchAlt, setTouchAlt] = useState(false);
+  const [touchLastKey, setTouchLastKey] = useState<string | null>(null);
   const shiftHeld = Boolean(pressedKey?.shift) || touchShift;
   const ctrlHeld = Boolean(pressedKey?.ctrl) || touchCtrl;
   const altHeld = Boolean(pressedKey?.alt) || touchAlt;
   const extendedHeld = ctrlHeld || altHeld;
-  const altGrShiftHeld = extendedHeld && shiftHeld;
+  const effectiveShift = shiftHeld !== Boolean(pressedKey?.capsLock);
+  const altGrShiftHeld = extendedHeld && effectiveShift;
   const shiftActive = pressedKey?.key === "shift" || shiftHeld;
   const ctrlActive = pressedKey?.key === "ctrl" || ctrlHeld;
   const altActive = pressedKey?.key === "alt" || altHeld;
@@ -29,9 +33,11 @@ export function VirtualKeyboard({ pressedKey, expectedKey, sizeVariant = "defaul
   const expectedAlt = Boolean(expectedKey?.alt);
 
   const press = (key: string) => {
-    const layer = altGrShiftHeld ? "altgrShift" : extendedHeld ? "altgr" : shiftHeld ? "shift" : "base";
+    const layer = altGrShiftHeld ? "altgrShift" : extendedHeld ? "altgr" : effectiveShift ? "shift" : "base";
     const value = getUrduForKey(key, layer);
     if (!value) return;
+    setTouchLastKey(key);
+    window.setTimeout(() => setTouchLastKey((current) => current === key ? null : current), 180);
     onKeyPress?.(value);
     if (touchShift) setTouchShift(false);
   };
@@ -45,8 +51,9 @@ export function VirtualKeyboard({ pressedKey, expectedKey, sizeVariant = "defaul
         <div key={rowIndex} className={cn("flex w-full", gap)}>
           {row.map((key) => {
             const active = pressedKey?.key === key;
+            const pulse = touchLastKey === key || pressedKey?.lastKey === key;
             const expected = expectedKey?.key === key;
-            const layer = altGrShiftHeld ? "altgrShift" : extendedHeld ? "altgr" : shiftHeld ? "shift" : "base";
+            const layer = altGrShiftHeld ? "altgrShift" : extendedHeld ? "altgr" : effectiveShift ? "shift" : "base";
             const shown = getUrduForKey(key, layer) ?? getUrduForKey(key, "base");
             return (
               <button
@@ -61,6 +68,7 @@ export function VirtualKeyboard({ pressedKey, expectedKey, sizeVariant = "defaul
                   keyHeight,
                   interactive && "cursor-pointer touch-manipulation active:scale-[0.97]",
                   active && "keyboard-premium-key--pressed",
+                  pulse && "keyboard-premium-key--press-pulse",
                   !active && expected && "keyboard-premium-key--expected",
                 )}
               >
@@ -73,22 +81,34 @@ export function VirtualKeyboard({ pressedKey, expectedKey, sizeVariant = "defaul
           })}
           {rowIndex === keyboardRows.length - 1 && (
             <>
-              <ModifierKey label="Shift" active={shiftActive} expected={Boolean(expectedKey?.shift)} height={keyHeight} interactive={interactive} onPress={() => setTouchShift((v) => !v)} />
-              <ModifierKey label="Alt" active={altActive} expected={expectedAlt} height={keyHeight} interactive={interactive} onPress={() => setTouchAlt((v) => !v)} />
-              <ModifierKey label="Ctrl" active={ctrlActive} expected={expectedCtrl} height={keyHeight} interactive={interactive} onPress={() => setTouchCtrl((v) => !v)} />
+              <ModifierKey label="Shift" active={shiftActive} pressed={pressedKey?.lastKey === "shift"} expected={Boolean(expectedKey?.shift)} height={keyHeight} interactive={interactive} onPress={() => setTouchShift((v) => !v)} />
+              <ModifierKey label="Alt" active={altActive} pressed={pressedKey?.lastKey === "alt"} expected={expectedAlt} height={keyHeight} interactive={interactive} onPress={() => setTouchAlt((v) => !v)} />
+              <ModifierKey label="Ctrl" active={ctrlActive} pressed={pressedKey?.lastKey === "ctrl"} expected={expectedCtrl} height={keyHeight} interactive={interactive} onPress={() => setTouchCtrl((v) => !v)} />
             </>
           )}
         </div>
       ))}
       <div className={cn("flex w-full", gap)}>
-        <button type="button" tabIndex={-1} disabled={!interactive} aria-label="Space" onPointerDown={(e) => { e.preventDefault(); if (interactive) onKeyPress?.(" "); }} className={cn("keyboard-premium-space flex-1 rounded-[10px] border transition-all duration-150", compact ? "h-[clamp(1.35rem,3.2vh,2rem)]" : "h-8 sm:h-10", pressedKey?.key === "space" && "keyboard-premium-key--pressed", expectedKey?.key === "space" && "keyboard-premium-key--expected")} />
-        {interactive && <button type="button" tabIndex={-1} aria-label="Backspace" onPointerDown={(e) => { e.preventDefault(); onBackspace?.(); }} className={cn("keyboard-premium-space flex flex-1 items-center justify-center rounded-[10px] border text-sm transition-all duration-150", compact ? "h-[clamp(1.35rem,3.2vh,2rem)]" : "h-8 sm:h-10")}>⌫</button>}
+        <button type="button" tabIndex={-1} disabled={!interactive} aria-label="Space" onPointerDown={(e) => { e.preventDefault(); if (interactive) { setTouchLastKey("space"); window.setTimeout(() => setTouchLastKey((current) => current === "space" ? null : current), 180); onKeyPress?.(" "); } }} className={cn("keyboard-premium-space flex-1 rounded-[10px] border transition-all duration-150", compact ? "h-[clamp(1.35rem,3.2vh,2rem)]" : "h-8 sm:h-10", pressedKey?.key === "space" && "keyboard-premium-key--pressed",
+          (touchLastKey === "space" || pressedKey?.lastKey === "space") && "keyboard-premium-key--press-pulse", expectedKey?.key === "space" && "keyboard-premium-key--expected")} />
+        {interactive && <button type="button" tabIndex={-1} aria-label="Backspace" onPointerDown={(e) => { e.preventDefault(); setTouchLastKey("backspace"); window.setTimeout(() => setTouchLastKey((current) => current === "backspace" ? null : current), 180); onBackspace?.(); }} className={cn("keyboard-premium-space flex flex-1 items-center justify-center rounded-[10px] border text-sm transition-all duration-150", compact ? "h-[clamp(1.35rem,3.2vh,2rem)]" : "h-8 sm:h-10", touchLastKey === "backspace" && "keyboard-premium-key--press-pulse")}>⌫</button>}
       </div>
+      {(touchLastKey || pressedKey?.lastKey) && (
+        <p className="mt-2 text-center text-[11px] font-medium text-ink-faint" aria-live="polite">
+          {text("Key is pressed")}: {touchLastKey || pressedKey?.lastKey}
+        </p>
+      )}
     </div>
   );
 }
 
-function ModifierKey({ label, active, expected, height, interactive, onPress }: { label: string; active: boolean; expected: boolean; height: string; interactive: boolean; onPress: () => void }) {
-  const className = cn("flex min-w-0 flex-[1.45] items-center justify-center rounded-[10px] border text-xs font-medium transition-all duration-150", height, interactive && "cursor-pointer touch-manipulation active:scale-[0.97]", active && "keyboard-premium-modifier--pressed", !active && expected && "keyboard-premium-modifier--expected");
-  return interactive ? <button type="button" tabIndex={-1} aria-label={label} aria-pressed={active} onPointerDown={(e) => { e.preventDefault(); onPress(); }} className={className}>{label}</button> : <span className={className}>{label}</span>;
+function ModifierKey({ label, active, pressed = false, expected, height, interactive, onPress }: { label: string; active: boolean; pressed?: boolean; expected: boolean; height: string; interactive: boolean; onPress: () => void }) {
+  const [pulse, setPulse] = useState(false);
+  const className = cn("flex min-w-0 flex-[1.45] items-center justify-center rounded-[10px] border text-xs font-medium transition-all duration-150", height, interactive && "cursor-pointer touch-manipulation active:scale-[0.97]", active && "keyboard-premium-modifier--pressed", pulse && "keyboard-premium-modifier--press-pulse", pressed && "keyboard-premium-modifier--press-pulse", !active && expected && "keyboard-premium-modifier--expected");
+  const handlePress = () => {
+    setPulse(true);
+    window.setTimeout(() => setPulse(false), 180);
+    onPress();
+  };
+  return interactive ? <button type="button" tabIndex={-1} aria-label={label} aria-pressed={active} onPointerDown={(e) => { e.preventDefault(); handlePress(); }} className={className}>{label}</button> : <span className={className}>{label}</span>;
 }

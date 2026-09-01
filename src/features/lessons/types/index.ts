@@ -1,5 +1,4 @@
 import type { LessonDifficulty } from "@/types";
-import type { ExpectedKey } from "@/features/keyboard";
 
 /**
  * The kind of lesson. Drives which content fields are meaningful and
@@ -35,7 +34,7 @@ export interface LessonStep {
   target?: string;
   character?: string;
   phonetic?: string;
-  expectedKey?: ExpectedKey;
+  expectedKey?: { key: string; shift: boolean };
   minimumAccuracy?: number;
   note?: string;
   examples?: LessonExample[];

@@ -9,6 +9,10 @@ export type LocalizedText = [source: string, en: string, ur: string, roman: stri
  * is never translated accidentally.
  */
 const entries: LocalizedText[] = [
+  ["Start typing from here", "Start typing from here", "یہاں سے ٹائپ کرنا شروع کریں", "Yahan se typing shuru karein"],
+  ["Key is pressed", "Key is pressed", "Key دبائی گئی ہے", "Key dabai gayi hai"],
+  ["CapsLock is on", "CapsLock is on", "CapsLock آن ہے", "CapsLock on hai"],
+
   ["Primary", "Primary", "بنیادی نیویگیشن", "Primary"],
   ["Urdu Letters", "Urdu Letters", "اردو حروف", "Urdu huruf"],
   ["Urdu Phonetic Typing", "Urdu Phonetic Typing", "اردو فونیٹک ٹائپنگ", "Urdu phonetic typing"],

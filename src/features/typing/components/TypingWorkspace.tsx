@@ -62,6 +62,7 @@ export function TypingWorkspace({
       {/* 1. Header metrics */}
       <TypingStats
         accuracy={session.typing.sessionAccuracy}
+        resetKey={session.sessionResetKey}
         currentIndex={session.typing.currentIndex}
         totalCharacters={session.typing.sessionKeystrokes}
         incorrectCharacters={session.typing.incorrectCharacters}
@@ -87,6 +88,10 @@ export function TypingWorkspace({
         canType={session.timer.canAcceptInput}
         isLocked={session.ended}
         onActiveChange={session.setCaptureActive}
+        timerExpired={session.expired}
+        wpm={session.wpm}
+        accuracy={session.typing.sessionAccuracy}
+        resetKey={session.sessionResetKey}
         onKeyPress={session.keyboardTap.onKeyPress}
         onBackspace={session.keyboardTap.onBackspace}
       />

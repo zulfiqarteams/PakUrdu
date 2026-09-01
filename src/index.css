@@ -977,3 +977,12 @@ body[lang="ur"],
   .transition-colors,
   .transition-all { transition: none !important; }
 }
+
+
+.typing-start-hint { animation: typing-hint-in 180ms var(--ease-premium) both; }
+@keyframes typing-hint-in { from { opacity: 0; transform: translate(-50%, -0.25rem); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes keyboard-key-press { 0% { transform: translateY(0) scale(1); } 45% { transform: translateY(1px) scale(.965); } 100% { transform: translateY(0) scale(1); } }
+.keyboard-premium-key--press-pulse,.keyboard-premium-modifier--press-pulse { animation: keyboard-key-press 180ms var(--ease-premium); }
+@media (prefers-reduced-motion: reduce) { .typing-start-hint,.keyboard-premium-key--press-pulse,.keyboard-premium-modifier--press-pulse { animation: none; } }
+.typing-timeout-feedback { max-width: 42rem; margin-inline: auto; }
+@media (max-width: 640px) { .typing-start-hint { max-width: calc(100% - 1rem); white-space: nowrap; } .keyboard-premium-key,.keyboard-premium-modifier { border-radius: 7px; } }

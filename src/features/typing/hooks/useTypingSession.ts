@@ -86,6 +86,7 @@ export function useTypingSession({
     wpm,
     cpm,
     reset,
+    sessionResetKey: `${resetKey}:${sessionVersion}`,
   }), [
     typing,
     timer,
@@ -100,5 +101,7 @@ export function useTypingSession({
     wpm,
     cpm,
     reset,
+    sessionVersion,
+    resetKey,
   ]);
 }

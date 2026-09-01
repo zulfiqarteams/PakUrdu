@@ -161,6 +161,9 @@ function TimedTypingPractice({ bio, chapterIndex, level, onComplete }: { bio: Bi
         typingFeedback={typingFeedback}
         canType={elapsedTimer.canAcceptInput}
         isLocked={sessionFinished}
+        timerExpired={expired}
+        wpm={wpm}
+        accuracy={typing.sessionAccuracy}
         onActiveChange={setIsCaptureActive}
         onKeyPress={keyboardTapInput.onKeyPress}
         onBackspace={keyboardTapInput.onBackspace}
