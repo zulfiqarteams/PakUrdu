@@ -62,7 +62,6 @@ export function TypingWorkspace({
       {/* 1. Header metrics */}
       <TypingStats
         accuracy={session.typing.sessionAccuracy}
-        resetKey={session.sessionResetKey}
         currentIndex={session.typing.currentIndex}
         totalCharacters={session.typing.sessionKeystrokes}
         incorrectCharacters={session.typing.incorrectCharacters}
